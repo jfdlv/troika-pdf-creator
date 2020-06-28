@@ -1,0 +1,39 @@
+div.background-container {
+    margin-top: 20px; 
+    max-width: 1280px;
+    max-height: 650px;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+div.background-container div.possessions-container {
+    margin-top: 10px;
+}
+
+div.background-container div.advanced-skills-container  {
+    margin-top: 10px;
+}
+
+div.background-container div.special-container {
+    margin-top:10px;
+    margin-bottom: 10px;
+}
+
+div.background-container div.file-input-container div::before{
+    border-bottom: none;
+}
+
+div.print-button-container {
+    width: 100%;
+    text-align: right;
+}
+
+div.button-container {
+    text-align: center;
+    vertical-align: middle;
+}
+
+div.button-container button {
+    margin-top: 10px;
+}
+
