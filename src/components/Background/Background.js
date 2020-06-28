@@ -1,12 +1,11 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useRef} from "react";
 import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel} from '@material-ui/core';
 import cloneDeep from 'lodash/cloneDeep';
 import DeleteIcon from '@material-ui/icons/Delete';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import {BlobProvider, pdf} from '@react-pdf/renderer';
-import {BackgroundTemplate} from "../../pdf-templates/BackgroundTemplate";
+import { pdf} from '@react-pdf/renderer';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 
 import './Background.css';
@@ -94,10 +93,6 @@ export default function Background() {
         imgUrl: ""
       }
     );
-
-    // const [backgroundImage, setBackgroundImage] = useState("");
-
-    const [pdfTemplate, setPdfTemplate] = useState(false);
 
     let handleNameChange = (event)  => {
         let newState = cloneDeep(state);
@@ -223,7 +218,7 @@ export default function Background() {
             window.open(url,"_blank");
       });
     } 
-    
+
     const advancedSkillRef = useRef();
     const advancedSkillLevelRef = useRef();
     const possessionRef = useRef();
