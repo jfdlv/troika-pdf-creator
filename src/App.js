@@ -1,6 +1,7 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import Background from './components/Background/Background';
+import CharacterGenerator from './components/CharacterGenerator/CharacterGenerator';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import MoodRoundedIcon from '@material-ui/icons/MoodRounded';
@@ -25,8 +26,8 @@ export default function App() {
         case "background": 
           history.push('/');
           return null;
-        case "enemies": 
-          history.push('/enemies');
+        case "characterGen": 
+          history.push('/characterGen');
           return null;
         default: 
           return null;
@@ -37,8 +38,8 @@ export default function App() {
     <React.Fragment>
 
         <Switch>
-          <Route path="/enemies">
-            <Enemies />
+          <Route path="/characterGen">
+            <CharacterGenerator />
           </Route>
           <Route path="/">
             <Background />
@@ -47,13 +48,9 @@ export default function App() {
 
         <BottomNavigation value={value} onChange={handleChange} className="bottom-navigation">
           <BottomNavigationAction label="Background" value="background" icon={<MoodRoundedIcon />} />
-          <BottomNavigationAction label="Enemies" value="enemies" icon={<MoodBadRoundedIcon />} />
+          <BottomNavigationAction label="Character Generator" value="characterGen" icon={<MoodBadRoundedIcon />} />
         </BottomNavigation>
       {/* </div> */}
     </React.Fragment>
   );
-}
-
-function Enemies() {
-  return <h2>Enemies</h2>;
 }

@@ -300,7 +300,7 @@ export default function Background() {
                     </Grid>
 
                     <div className="print-button-container">
-                      <Button onClick={printPdf}>Print</Button>
+                      <Button onClick={printPdf} variant="contained">Print</Button>
                       {/* <BlobProvider document={pdfTemplate}>
                       {({ blob, url }) => {
                         return <Button href={url} target="_blank" variant="contained">Print</Button>
