@@ -1,4 +1,4 @@
-###Troika PDF Creator
+### Troika PDF Creator
 
 Will be a toolkit to generate content for troika! tabletop rpg. For now there are 2 features, one that creates a pdf with a background for the game depending on the data you introduce, and other that walks you through the process of creating a character for the Game.
 
