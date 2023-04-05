@@ -1,0 +1,17 @@
+.character-generator-container { 
+    overflow-y: auto;
+    padding-bottom: 5%;
+    .button-container { 
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+}
+
+@media (max-width: 800px) { 
+    .button-container { 
+        Button {
+            width: 100%;
+        }
+    }
+}

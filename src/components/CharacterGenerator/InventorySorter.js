@@ -8,21 +8,11 @@ import {
 import RootRef from "@material-ui/core/RootRef";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DragHandleIcon from '@material-ui/icons/DragHandle';
-import {Store} from "../../Store";
-
-// fake data generator
-// const getItems = count =>
-//   Array.from({ length: count }, (v, k) => k).map(k => ({
-//     id: `item-${k}`,
-//     primary: `item ${k}`,
-//     secondary: k % 2 === 0 ? `Whatever for ${k}` : undefined
-//   }));
-
-// a little function to help us with reordering the result
+import {Store} from "../../AppState/Store";
 
 export default function Inventory() {
 
-  const {state, dispatch} = useContext(Store);
+  const {state, actions} = useContext(Store);
 
   const [possessions, setPossessions] = useState([]);
 
@@ -51,7 +41,8 @@ export default function Inventory() {
 
     updatedCharacterInfo.background.possessions = items;
     
-    dispatch({type:"SET_CHARACTER_INFO", payload: updatedCharacterInfo});
+    // dispatch({type:"SET_CHARACTER_INFO", payload: updatedCharacterInfo});
+    actions.setCharacterInfo(updatedCharacterInfo);
     setPossessions(items);
   }
 
@@ -95,7 +86,8 @@ export default function Inventory() {
                         )}
                       >
                         <ListItemText
-                          primary={item}
+                          primary={item.toLowerCase()}
+                          style={{textTransform: "capitalize"}}
                         />
                         <ListItemSecondaryAction>
                             <DragHandleIcon />

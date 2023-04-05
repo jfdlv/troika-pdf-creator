@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {TextField, Container, Grid, Button} from '@material-ui/core';
+import {TextField, Container, Grid, Button, Paper} from '@mui/material';
 import {Document, pdf} from '@react-pdf/renderer';
 import {
     Route,
@@ -8,18 +8,16 @@ import {
     useHistory
 } from "react-router-dom";
 
-import "firebase/firestore";
-
-import {Store} from "../../Store";
+import {Store} from "../../AppState/Store";
 import CharacterSheetTemplate from "../../pdf-templates/CharacterSheetTemplate";
 import EditCharacter from "./EditCharacter";
-import axios from "axios";
 
-import "./CharacterGenerator.css";
+import "./CharacterGenerator.scss";
+import isEmpty from "lodash/isEmpty";
 
 export default function CharacterGenerator() {
 
-    const { state, dispatch } = React.useContext(Store);
+    const { state, actions } = React.useContext(Store);
 
     const [backgrounds, setBackgrounds] = useState([]);
 
@@ -32,23 +30,23 @@ export default function CharacterGenerator() {
     let { path, url } = useRouteMatch();
 
     useEffect(()=>{
-        let backgroundsArray = [];
-        let damageTable = {};
-    
-        axios.get("backgrounds.json").then((response)=>{
-            console.log(backgroundsArray);
-            backgroundsArray = response.data;
-            setBackgrounds(backgroundsArray);
-        });
-
-        axios.get("damageTable.json").then((response)=>{
-            console.log(response);
-            damageTable = response.data;
-            setDamageTable(damageTable);
-        });
-
-
+        actions.getBackgrounds();
     },[]);
+
+    useEffect(()=>{
+        if(state.backgrounds.length>0) {
+            setBackgrounds(state.backgrounds)
+        }
+        console.log(state.backgrounds);
+
+    },[state.backgrounds])
+
+    useEffect(()=>{
+        if(!isEmpty(state.damageTable)) {
+            setDamageTable(state.damageTable)
+        }
+        console.log(state.damageTable);
+    },[state.damageTable])
 
     const throwDice = (dice) => {
        return Math.floor(Math.random() * (1 + dice - 1)) + 1
@@ -84,8 +82,8 @@ export default function CharacterGenerator() {
         characterInfo.background = background;
 
         characterInfo.background.possessions = characterInfo.background.possessions.concat(characterInfo.baselinePossessions)
-
-        dispatch({type: "SET_CHARACTER_INFO", payload: characterInfo});
+        console.log(characterInfo);
+        actions.setCharacterInfo(characterInfo);
         history.push(`${url}/editCharacter`);
     }
 
@@ -94,24 +92,24 @@ export default function CharacterGenerator() {
             <Grid container>
                 <Switch>
                     <Route exact path={path}>
-                        <Container>
+                        <Container style={{marginTop: "10px"}}>
                             <Grid item md={12}>
-                                <TextField fullWidth label="Character Name" value={characterName} onChange={(event)=>{setCharacterName(event.target.value)}}/>
+                                <Paper>
+                                    <TextField fullWidth label="Character Name" value={characterName} onChange={(event)=>{setCharacterName(event.target.value)}}/>
+                                </Paper>
                             </Grid>
                             <Grid container>
                                 <Grid item md={12} style={{textAlign: "right", marginTop: "10px"}}>
-                                    <Button onClick={goToSetupView} variant="contained">Next Step</Button>
+                                    <Button onClick={goToSetupView} variant="outlined" color="secondary">Next Step</Button>
                                 </Grid>
                             </Grid>
                         </Container>
                     </Route>
                     <Route path={`${path}/editCharacter`}>
                         <EditCharacter/>
-                        <Container>
-                            <Grid item md={12} style={{textAlign: "right", marginTop: "10px"}}>
-                                <Button onClick={generatePdf} variant="contained">Generate Character</Button>
-                            </Grid>
-                        </Container>
+                        <div className="button-container">
+                            <Button onClick={generatePdf} variant="outlined" color="secondary">Generate Character</Button>
+                        </div>
                     </Route>
                 </Switch>
             </Grid>

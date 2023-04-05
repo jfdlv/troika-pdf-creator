@@ -1,7 +1,5 @@
 div.background-container {
-    margin-top: 20px; 
-    max-width: 1280px;
-    max-height: 650px;
+    margin-top: 20px;
     overflow: auto;
     overflow-x: hidden;
 }

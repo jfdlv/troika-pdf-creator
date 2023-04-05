@@ -413,14 +413,14 @@ export default function CharacterSheetTemplate(characterInfo, damageTable) {
     if(possessions.length < 12) {
         let lengthDiff = 12 - possessions.length;
         for(let i = 0; i<lengthDiff; i++){
-            possessions.push('');
+            possessions.push(' ');
         }
     }
 
     if(weaponsArray.length < 5) {
         let lengthDiffWeaponsArray = 5 - weaponsArray.length;
         for(let i = 0; i<lengthDiffWeaponsArray; i++){
-            weaponsArray.push('');
+            weaponsArray.push(' ');
         }
     } 
     

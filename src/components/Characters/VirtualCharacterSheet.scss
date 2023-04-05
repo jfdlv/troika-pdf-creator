@@ -1,0 +1,56 @@
+.virtual-character-sheet {
+  padding: 15px;
+  margin-left: 5%;
+  margin-right: 5%;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.virtual-character-sheet .container {
+  display: flex;
+  flex-grow: 1;
+  gap: 10px;
+}
+
+.virtual-character-sheet .container .top-info-item {
+  flex-grow: 1;
+  max-width: 50%;
+}
+
+.virtual-character-sheet .item-container {
+  padding: 10px;
+  height: 100%;
+}
+
+.virtual-character-sheet .item-label {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 5px;
+  text-transform: capitalize;
+}
+
+.virtual-character-sheet .advanced-skills-container { 
+  flex-grow: 1;
+  max-width: 50%;
+}
+
+.virtual-character-sheet .inventory-container { 
+  flex-grow: 1;
+  max-width: 50%;
+}
+
+/* .virtual-character-sheet .item-container .item-value {
+  text-align: center;
+} */
+
+/* .virtual-character-sheet .skills-inventory-container {
+  max-height: 50%;
+  overflow-y: scroll;
+} */
+
+.virtual-character-sheet .special-container {
+  padding: 15px;
+  width: 100%;
+  height: 100%;
+}

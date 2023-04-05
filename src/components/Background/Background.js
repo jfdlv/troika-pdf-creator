@@ -1,5 +1,5 @@
 import React, {useState, useRef} from "react";
-import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel} from '@material-ui/core';
+// import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel} from '@material-ui/core';
 import cloneDeep from 'lodash/cloneDeep';
 import DeleteIcon from '@material-ui/icons/Delete';
 import List from '@material-ui/core/List';
@@ -7,6 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { pdf} from '@react-pdf/renderer';
 import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
+import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel,Paper} from '@mui/material';
 
 import './Background.css';
 
@@ -224,91 +225,105 @@ export default function Background() {
     const possessionRef = useRef();
   
     return <React.Fragment>
-      <Container className="background-container">
-            <form>
-                  {/* <InputLabel>Description:</InputLabel> */}
-                  <Grid container>
-                    
-                    <h2>Create Troika Background</h2>
+        <Container className="background-container">
+          {/* <Paper> */}
+              <form>
+                    {/* <InputLabel>Description:</InputLabel> */}
+                    <Grid container>
+                      
+                      <h2>Create Troika Background</h2>
 
-                    <Grid item md={12} style={{marginTop: "10px"}}>
-                      <TextField fullWidth={true} label="Background Name" type="text" id="name" value={state.name} onChange={handleNameChange} variant="outlined"/>
-                    </Grid>
+                      <Grid item md={12} style={{marginTop: "10px"}}>
+                        <Paper>
+                          <TextField fullWidth={true} label="Background Name" type="text" id="name" value={state.name} onChange={handleNameChange} variant="outlined"/>
+                        </Paper>
+                      </Grid>
 
-                    <Grid item md={12} style={{marginTop: "10px"}}>
-                      <TextField fullWidth={true} label="Description" type="text" id="description" multiline rows={4} value={state.description} onChange={handleDescriptionChange} variant="outlined"/>
-                    </Grid>
-                    
-                    <Grid container spacing={1} className="possessions-container">
-                      <Grid item md={11}>
-                        <TextField fullWidth={true} label="Possessions:" type="text" id="possession" variant="outlined" inputRef={possessionRef}/>
+                      <Grid item md={12} style={{marginTop: "10px"}}>
+                        <Paper>
+                          <TextField fullWidth={true} label="Description" type="text" id="description" multiline rows={4} value={state.description} onChange={handleDescriptionChange} variant="outlined"/>
+                        </Paper>
                       </Grid>
-                      <Grid className="button-container" item md={1} style={{textAlign: "center", verticalAlign: "middle"}}> 
-                          <Button variant="contained" onClick={handlePossessionsAdd}>Add</Button>
-                      </Grid>
-                      <Grid item md={12}>
-                        <List aria-label="secondary mailbox folders">
-                          {state.possessions && state.possessions.map((item, index)=>{
-                              return <ListItem key={`${item}${index}`}>
-                                      <ListItemText primary={item} />
-                                      <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeletePossession(index)}}>
-                                          <DeleteIcon />
-                                        </IconButton>
-                                      </ListItemSecondaryAction>
-                                    </ListItem>
-                          })}
-                        </List>
-                      </Grid>
-                    </Grid>
-                    
-                    <Grid container spacing={1} className="advanced-skills-container">
-                        <Grid item md={5}>
-                          <TextField  fullWidth={true} label="Advanced Skill:" type="text" id="advancedSkill" variant="outlined" inputRef={advancedSkillRef}/>
+                      
+                      <Grid container spacing={1} className="possessions-container">
+                        <Grid item md={11}>
+                          <Paper>
+                            <TextField fullWidth={true} label="Possessions:" type="text" id="possession" variant="outlined" inputRef={possessionRef}/>
+                          </Paper>
                         </Grid>
-                        <Grid item md={5}>
-                          <TextField fullWidth={true} label="Level:" type="number" id="advancedSkillLevel" variant="outlined" inputRef={advancedSkillLevelRef}/>
-                        </Grid>
-                        <Grid item md={2} className="button-container"> 
-                          <Button variant="contained" onClick={handleAdvancedSkillAdd}>Add</Button>
+                        <Grid className="button-container" item md={1} style={{textAlign: "center", verticalAlign: "middle"}}> 
+                            <Button variant="contained" onClick={handlePossessionsAdd}>Add</Button>
                         </Grid>
                         <Grid item md={12}>
                           <List aria-label="secondary mailbox folders">
-                            {state.advancedSkills && state.advancedSkills.map((item, index)=>{
-                              return <ListItem key={`${item}${index}`}>
-                                      <ListItemText primary={item} />
-                                      <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeleteAdvncdSkill(index)}}>
-                                          <DeleteIcon/>
-                                        </IconButton>
-                                      </ListItemSecondaryAction>
-                                    </ListItem>
-                              })
-                            }
+                            {state.possessions && state.possessions.map((item, index)=>{
+                                return <ListItem key={`${item}${index}`}>
+                                        <ListItemText primary={item} />
+                                        <ListItemSecondaryAction>
+                                          <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeletePossession(index)}}>
+                                            <DeleteIcon />
+                                          </IconButton>
+                                        </ListItemSecondaryAction>
+                                      </ListItem>
+                            })}
                           </List>
                         </Grid>
-                    </Grid>
+                      </Grid>
+                      
+                      <Grid container spacing={1} className="advanced-skills-container">
+                          <Grid item md={5}>
+                            <Paper>
+                              <TextField  fullWidth={true} label="Advanced Skill:" type="text" id="advancedSkill" variant="outlined" inputRef={advancedSkillRef}/>
+                            </Paper>
+                          </Grid>
+                          <Grid item md={5}>
+                            <Paper>
+                              <TextField fullWidth={true} label="Level:" type="number" id="advancedSkillLevel" variant="outlined" inputRef={advancedSkillLevelRef}/>
+                            </Paper>
+                          </Grid>
+                          <Grid item md={2} className="button-container"> 
+                            <Button variant="contained" onClick={handleAdvancedSkillAdd}>Add</Button>
+                          </Grid>
+                          <Grid item md={12}>
+                            <List aria-label="secondary mailbox folders">
+                              {state.advancedSkills && state.advancedSkills.map((item, index)=>{
+                                return <ListItem key={`${item}${index}`}>
+                                        <ListItemText primary={item} />
+                                        <ListItemSecondaryAction>
+                                          <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeleteAdvncdSkill(index)}}>
+                                            <DeleteIcon/>
+                                          </IconButton>
+                                        </ListItemSecondaryAction>
+                                      </ListItem>
+                                })
+                              }
+                            </List>
+                          </Grid>
+                      </Grid>
 
-                    <Grid item md={12} className="special-container" style={{marginTop: "10px", marginBottom: "10px"}}>
-                      <TextField fullWidth={true} label="Special" type="text" id="special" value={state.special} onChange={handleSpecialChange} variant="outlined"/>
-                    </Grid>
+                      <Grid item md={12} className="special-container" style={{marginTop: "10px", marginBottom: "10px"}}>
+                        <Paper>
+                          <TextField fullWidth={true} label="Special" type="text" id="special" value={state.special} onChange={handleSpecialChange} variant="outlined"/>
+                        </Paper>
+                      </Grid>
 
-                    <Grid item md={12} className="file-input-container">
-                      <InputLabel>Background Image: </InputLabel>
-                      <Input type="file" accept="image/*" onChange={readUrl} id="" />
-                      <img src="" alt="" style={{width:"50px", height: "50px"}} id="image-holder"/>
-                    </Grid>
+                      {/* <Grid item md={12} className="file-input-container">
+                        <InputLabel>Background Image: </InputLabel>
+                        <Input type="file" accept="image/*" onChange={readUrl} id="" />
+                        <img src="" alt="" style={{width:"50px", height: "50px"}} id="image-holder"/>
+                      </Grid> */}
 
-                    <div className="print-button-container">
-                      <Button onClick={printPdf} variant="contained">Print</Button>
-                      {/* <BlobProvider document={pdfTemplate}>
-                      {({ blob, url }) => {
-                        return <Button href={url} target="_blank" variant="contained">Print</Button>
-                      }}
+                      <div className="print-button-container">
+                        <Button onClick={printPdf} variant="contained">Print</Button>
+                        {/* <BlobProvider document={pdfTemplate}>
+                        {({ blob, url }) => {
+                          return <Button href={url} target="_blank" variant="contained">Print</Button>
+                        }}
                       </BlobProvider> */}
-                    </div>
-                </Grid>
-            </form>
-      </Container>
+                      </div>
+                  </Grid>
+              </form>
+          {/* </Paper> */}
+        </Container>
     </React.Fragment>;
 }

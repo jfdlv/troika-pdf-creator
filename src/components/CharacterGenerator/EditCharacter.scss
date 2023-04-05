@@ -1,0 +1,195 @@
+/* .characterName-paper {
+    padding: 10px;
+} */
+
+div.edit-character-container { 
+    display: flex;
+    flex-direction: column;
+    div.character-name-container {
+        display: flex;
+        min-width: 100%;
+        flex-direction: column;
+        // div.characterName-header{ 
+        //     width:100%
+        // }
+        div.characterName-paper {
+            width: 100%;
+        }
+    }
+    div.background-notes-special-container { 
+        display: flex;
+        min-width: 100%;
+        gap: 10px;
+        div.backgroundInfo-container { 
+            display: flex;
+            max-width: 30%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.backgroundInfo-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+            }
+        }
+        div.backgroundSpecial-container { 
+            display: flex;
+            max-width: 40%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.backgroundSpecial-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+            }
+        }
+        div.notes-container { 
+            display: flex;
+            max-width: 30%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.notes-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+                fieldset { 
+                    border: 0px;
+                }
+                
+            }
+        }
+    }
+    div.background-notes-container { 
+        display: flex;
+        min-width: 100%;
+        gap: 10px;
+        div.backgroundInfo-container { 
+            display: flex;
+            max-width: 50%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.backgroundInfo-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+            }
+        }
+        div.notes-container { 
+            display: flex;
+            max-width: 50%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.notes-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+                fieldset { 
+                    border: 0px;
+                }
+                
+            }
+        }
+    }
+    div.possessions-advanced-skills-container { 
+        display: flex;
+        gap: 10px;
+        div.possessions-container { 
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            max-width: 50%;
+            div.inventory-paper {
+                height: 100%;
+            }
+        }
+        div.advanced-skills-container { 
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            max-width: 50%;
+            height: 100%;
+            div.advanced-skills {
+                height: 100%;
+                div.advanced-skills-paper { 
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 800px) { 
+    div.background-notes-special-container, div.background-notes-container { 
+        display: flex;
+        min-width: 100%;
+        flex-direction: column;
+        gap: 10px;
+        div.backgroundInfo-container { 
+            display: flex;
+            flex-grow: 1;
+            min-width: 100%;
+            max-width: 100%;
+            flex-direction: column;
+            div.backgroundInfo-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+            }
+        }
+        div.backgroundSpecial-container { 
+            display: flex;
+            flex-grow: 1;
+            min-width: 100%;
+            max-width: 100%;
+            flex-direction: column;
+            div.backgroundSpecial-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+            }
+        }
+        div.notes-container { 
+            display: flex;
+            flex-grow: 1;
+            min-width: 100%;
+            max-width: 100%;
+            flex-direction: column;
+            div.notes-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+                fieldset { 
+                    border: 0px;
+                }
+                
+            }
+        }
+    }
+
+    div.possessions-advanced-skills-container { 
+        display: flex;
+        gap: 10px;
+        flex-direction: column;
+        div.possessions-container { 
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-width: 100%;
+            div.inventory-paper {
+                height: 100%;
+            }
+        }
+        div.advanced-skills-container { 
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-width: 100%;
+            height: 100%;
+            div.advanced-skills {
+                height: 100%;
+                div.advanced-skills-paper { 
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
