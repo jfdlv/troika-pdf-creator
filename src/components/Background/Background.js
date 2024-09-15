@@ -6,8 +6,19 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { pdf} from '@react-pdf/renderer';
-import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
-import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel,Paper} from '@mui/material';
+import { Page, 
+        Text, 
+        View, 
+        Document, 
+        StyleSheet, 
+        Image } from '@react-pdf/renderer';
+import { TextField, 
+        Container, 
+        Grid, 
+        ListItemSecondaryAction, 
+        IconButton, 
+        Button,
+        Paper } from '@mui/material';
 
 import './Background.css';
 
@@ -137,24 +148,6 @@ export default function Background() {
         let newState = cloneDeep(state);
         newState.advancedSkills.splice(index,1);
         setState(newState);
-    }
-
-    let readUrl = (event) => {
-        let newState = cloneDeep(state);
-        if (event.target.files && event.target.files[0]) {
-
-          var file = event.target.files[0];
-
-          window.URL = window.webkitURL || window.URL; // Vendor prefixed in Chrome.
-
-          var img = document.getElementById('image-holder');
-
-          var imgURL =  window.URL.createObjectURL(file)
-
-          img.setAttribute("src",imgURL);
-          newState.imgUrl = imgURL;
-          setState(newState);
-      }
     }
 
     let printPdf = () => {

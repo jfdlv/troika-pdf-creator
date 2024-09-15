@@ -20,7 +20,7 @@ import {
 import "./VirtualCharacterSheet.scss";
 
 export default function VirtualCharacterSheet() {
-    const { state, actions } = React.useContext(Store);
+    const { state } = React.useContext(Store);
     const [advancedSkillsObject, setAdvanceSkillsObject] = useState({});
     const [weaponsArray, setWeaponsArray] = useState([]);
 

@@ -80,6 +80,7 @@ export default function App() {
   useEffect(()=>{
     actions.getDamageTable();
     actions.getBackgrounds();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
   return (

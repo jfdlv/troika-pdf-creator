@@ -43,6 +43,7 @@ export function StoreProvider(props) {
             actions.setCurrentUser(firebaseUser);
           }
         })
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
 
     return <Store.Provider value={value}>{props.children}

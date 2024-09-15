@@ -10,7 +10,7 @@ import {database} from "../../config/firebase";
 
 import {Store} from "../../AppState/Store";
 
-import { doc, getDocs, collection } from "firebase/firestore";
+import { getDocs, collection } from "firebase/firestore";
 import { isEmpty } from 'lodash';
 
 import "./UserCharacters.scss";

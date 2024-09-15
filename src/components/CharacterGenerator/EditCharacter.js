@@ -1,12 +1,9 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext} from 'react';
 import _ from "lodash";
 import InventorySorter from './InventorySorter';
 import {Store} from '../../AppState/Store';
-import {TextField, Container, Grid, Paper} from '@mui/material';
+import {TextField, Paper} from '@mui/material';
 import isEmpty from 'lodash/isEmpty';
-import {
-  useHistory
-} from "react-router-dom";
 
 
 import {
@@ -20,12 +17,6 @@ import "./EditCharacter.scss";
 export default function EditCharacter () {
 
     const {state, actions} = useContext(Store);
-
-    const history = useHistory();
-
-    useEffect(()=>{
-        if(isEmpty(state.characterInfo)) history.push("/characterGen")
-    },[])
 
     const updateCharacterName = (event) => {
         let newCharacterInfo = Object.assign({},state.characterInfo);

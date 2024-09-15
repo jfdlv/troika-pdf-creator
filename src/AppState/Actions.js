@@ -1,5 +1,3 @@
-import axios from "axios";
-import isEmpty from "lodash/isEmpty";
 import { doc, collection, getDocs, getDoc, addDoc } from "firebase/firestore"; 
 import {database,auth} from "../config/firebase";
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword} from 'firebase/auth';
