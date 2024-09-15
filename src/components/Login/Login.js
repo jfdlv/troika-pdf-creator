@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useContext, useState} from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -8,6 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import InputLabel from '@mui/material/InputLabel';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import {useFormik} from 'formik';
 import {Store} from "../../AppState/Store";
 
@@ -15,7 +16,10 @@ import Alert from '@mui/material/Alert';
 
 export default function Login(props)  {
 
-  const { actions } = React.useContext(Store);
+  const { actions } = useContext(Store);
+
+  const  [showSpinner, setShowSpinner] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const formik = useFormik({
     initialValues: {
@@ -24,7 +28,10 @@ export default function Login(props)  {
     },
     onSubmit: (values) => {
       console.log(values);
-      actions.logIn(values,{setOpenLogin: props.setOpenLogin});
+      setShowSpinner(true);
+      actions.logIn(values,
+        { setShowSpinner, setErrorMessage },
+        {setOpenLogin: props.setOpenLogin});
     },
     validate: (values) => {
       let errors = {}
@@ -39,53 +46,55 @@ export default function Login(props)  {
   return <Dialog open={props.open} onClose={props.handleClose}>
   <DialogTitle style={{textAlign: "center"}}>Login</DialogTitle>
   <DialogContent>
-  <form onSubmit={formik.handleSubmit} data-testid="login-form">
-              <Grid container direction="row" >
-              {/* <div className="mb-3"> */}
-                <Grid item md={12}>
-                  <InputLabel style={{marginBottom: "15px"}}>Email: </InputLabel>
-                  <Paper>
-                    <TextField  
-                      type="text"
-                      className="form-control"
-                      id="emailField"
-                      name="email"
-                      onChange={formik.handleChange}
-                      value={formik.values.email}
-                      aria-label="email-field"
-                      style={{width: "100%"}}
-                      />
-                    {formik.errors.email ? (
-                      <Alert severity="error">{formik.errors.email}</Alert>
-                      ) : null}
-                  </Paper>
-                </Grid>
-              {/* </div> */}
-              {/* <div className="mb-3"> */}
-                <Grid item md={12} style={{marginTop: "15px"}}>
-                  <InputLabel style={{marginBottom: "15px"}}>Password: </InputLabel>
-                  <Paper>
-                    <TextField
-                      type="password"
-                      className="form-control"
-                      id="pswField"
-                      name="password"
-                      onChange={formik.handleChange}
-                      value={formik.values.password}
-                      aria-label="password-field"
-                      style={{width: "100%"}}
-                      />
-                    {formik.errors.password ? (
-                      <Alert severity="error">{formik.errors.password}</Alert>
-                      ) : null}
-                  </Paper>
-                </Grid> 
-              </Grid>
-              <DialogActions>
-                <Button onClick={props.handleClose}>Cancel</Button>
-                <Button type="submit">Login</Button>
-              </DialogActions>
-            </form>
+    <form onSubmit={formik.handleSubmit} data-testid="login-form">
+        <Grid container direction="row" >
+        {/* <div className="mb-3"> */}
+          <Grid item md={12}>
+            <InputLabel style={{marginBottom: "15px"}}>Email: </InputLabel>
+            <Paper>
+              <TextField  
+                type="text"
+                className="form-control"
+                id="emailField"
+                name="email"
+                onChange={formik.handleChange}
+                value={formik.values.email}
+                aria-label="email-field"
+                style={{width: "100%"}}
+                />
+              {formik.errors.email ? (
+                <Alert severity="error">{formik.errors.email}</Alert>
+                ) : null}
+            </Paper>
+          </Grid>
+        {/* </div> */}
+        {/* <div className="mb-3"> */}
+          <Grid item md={12} style={{marginTop: "15px"}}>
+            <InputLabel style={{marginBottom: "15px"}}>Password: </InputLabel>
+            <Paper>
+              <TextField
+                type="password"
+                className="form-control"
+                id="pswField"
+                name="password"
+                onChange={formik.handleChange}
+                value={formik.values.password}
+                aria-label="password-field"
+                style={{width: "100%"}}
+                />
+              {formik.errors.password ? (
+                <Alert severity="error">{formik.errors.password}</Alert>
+                ) : null}
+            </Paper>
+          </Grid> 
+        </Grid>
+        {errorMessage.length>0 && <Alert style={{marginTop: "10px"}} severity="error">{errorMessage}</Alert>}
+        <DialogActions>
+          <Button onClick={props.handleClose}>Cancel</Button>
+          <Button type="submit">Login</Button>
+          {showSpinner && <CircularProgress />}
+        </DialogActions>
+    </form>
   </DialogContent>
 </Dialog>
 }

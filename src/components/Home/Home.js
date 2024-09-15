@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useHistory } from "react-router-dom";
+import {Store} from "../../AppState/Store";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -7,10 +8,13 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import Grid from '@mui/material/Grid';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 import "./Home.scss";
 
 export default function Home() {
+  const { state, actions } = React.useContext(Store);
   const history = useHistory();
 
   const navigateTo = (newValue) => {
@@ -47,26 +51,27 @@ export default function Home() {
   }
 
   return (
-    // <Grid id="Home" container direction="row" spacing={3}justifyItems="center" alignItems="center" style={{maxHeight: "100%", width: "50%", marginLeft: "25%",padding:"10px"}}>
     <div className='home-container'>  
       <div className='home-item'>
-          <Card variant="outlined">
-            <MyCardContent 
-              title={"Character Generator"} 
-              description={"Generates a character picking a background randomly (from the core book) also lets you order your inventory and add some notes to the page before printing a PDF."} 
-              route={"characterGen"}
-              buttonLabel={"Create Character"}/>  
+          <Card variant="outlined" 
+            className='card-item'
+            onClick={()=>{navigateTo("characterGen")}}>
+              <PersonAddAlt1Icon style={{fontSize: "150px"}}/>
+              <div className="home-label">
+                Create Character
+              </div>
           </Card> 
       </div>
-      <div className='home-item'>
-          <Card variant="outlined">
-            <MyCardContent 
-                title={"Background Creator"} 
-                description={"Lets you create a background and print a PDF."} 
-                route={"background"}
-                buttonLabel={"Create Background"}/>  
+      {state.currentUser && <div className='home-item'>
+          <Card variant="outlined"
+            className='card-item'
+            onClick={()=>{navigateTo("background")}}>
+              <DescriptionIcon style={{fontSize: "150px"}}/>
+              <div className="home-label">
+                Add Background
+              </div>
           </Card>
-      </div>
+      </div>}
     </div>
   );
 }

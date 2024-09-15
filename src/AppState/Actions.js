@@ -1,14 +1,14 @@
 import axios from "axios";
 import isEmpty from "lodash/isEmpty";
-import { doc, collection, getDocs, getDoc } from "firebase/firestore"; 
+import { doc, collection, getDocs, getDoc, addDoc } from "firebase/firestore"; 
 import {database,auth} from "../config/firebase";
-import {signInWithEmailAndPassword} from 'firebase/auth';
+import {signInWithEmailAndPassword, createUserWithEmailAndPassword} from 'firebase/auth';
 
 export const useActions = (state, dispatch) => {
 
   const logIn = (
     credentials,
-    // { setShowSpinner, setShowErrorMessage, setErrorMessage },
+    { setShowSpinner, setErrorMessage },
     {setOpenLogin}
   ) => {
     signInWithEmailAndPassword(
@@ -18,14 +18,47 @@ export const useActions = (state, dispatch) => {
     )
       .then((userCredential) => {
         // Signed in
-        console.log(userCredential);
         setOpenLogin(false);
-        // setShowSpinner(false)
+        setShowSpinner(false);
+        setErrorMessage('');
       })
       .catch((error) => {
-        // setErrorMessage(`${error.code} ${error.message}`)
-        // setShowErrorMessage(true)
-        // setShowSpinner(false)
+        if(error.code === "auth/wrong-password") {
+          setErrorMessage("INVALID PASSWORD")
+        }
+        else {
+          setErrorMessage(`${error.code} ${error.message}`);
+        }
+        setShowSpinner(false);
+      })
+  }
+
+  const register = (
+    credentials,
+    { setShowSpinner, setErrorMessage },
+    {setOpenRegister}
+  ) => {
+    createUserWithEmailAndPassword(
+      auth,
+      credentials.email,
+      credentials.password,
+    )
+      .then((userCredential) => {
+        // Signed in
+        setOpenRegister(false);
+        setShowSpinner(false);
+        setErrorMessage('');
+      })
+      .catch((error) => {
+        if(error.code === 'auth/email-already-in-use') {
+          setErrorMessage("EMAIL ALREADY IN USE");
+        } else if (error.code === 'auth/weak-password') {
+          setErrorMessage('PASSWORD IS TOO WEAK');
+        }
+        else {
+          setErrorMessage(`${error.code} ${error.message}`);
+        }
+        setShowSpinner(false);
       })
   }
 
@@ -79,12 +112,32 @@ export const useActions = (state, dispatch) => {
     
   }
 
+  const addCharacter = async ({setShowSpinner, setErrorMessage, goToCharacters}) => {
+    // setShowSpinner(true);
+    const db = database;
+    const charactersRef = collection(db, "userCharacters", state.currentUser.uid, "characters");
+    try {
+      // Add a new document to the 'orders' subcollection
+      setShowSpinner(true);
+      goToCharacters();
+      const docRef = await addDoc(charactersRef, {...state.characterInfo});
+  
+      setErrorMessage('Order added with ID: ', docRef.id);
+    } catch (error) {
+      setErrorMessage('Error adding order: ', error);
+    } finally {
+      setShowSpinner(false);
+    }
+  }
+
   return {
     logIn,
+    register,
     signOut,
     setCharacterInfo,
     getBackgrounds,
     getDamageTable,
-    setCurrentUser
+    setCurrentUser,
+    addCharacter
   };
 };

@@ -1,8 +1,13 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import _ from "lodash";
 import InventorySorter from './InventorySorter';
 import {Store} from '../../AppState/Store';
 import {TextField, Container, Grid, Paper} from '@mui/material';
+import isEmpty from 'lodash/isEmpty';
+import {
+  useHistory
+} from "react-router-dom";
+
 
 import {
     List,
@@ -15,6 +20,12 @@ import "./EditCharacter.scss";
 export default function EditCharacter () {
 
     const {state, actions} = useContext(Store);
+
+    const history = useHistory();
+
+    useEffect(()=>{
+        if(isEmpty(state.characterInfo)) history.push("/characterGen")
+    },[])
 
     const updateCharacterName = (event) => {
         let newCharacterInfo = Object.assign({},state.characterInfo);
@@ -33,7 +44,7 @@ export default function EditCharacter () {
 
     console.log(state.characterInfo);
 
-    return <React.Fragment>
+    return !isEmpty(state.characterInfo) && <React.Fragment>
         <div className='edit-character-container'>
             <div className='character-name-container'>
                 <h1 className='characterName-header'>{`Character Name:`}</h1>
@@ -99,7 +110,7 @@ export default function EditCharacter () {
                                 {
                                     state.characterInfo.background.advancedSkills && _.map(state.characterInfo.background.advancedSkills,(result, index)=>{
                                         console.log(result, index)
-                                        return <ListItem id={`background${index}`}>
+                                        return <ListItem id={`background${index}`} key={`backgroundKey${index}`}>
                                                     <ListItemText
                                                     primary={`${result} ${index.replace(/([a-z0-9])([A-Z])/g, '$1 $2')}`}
                                                     />

@@ -7,10 +7,24 @@
   // align-items: center;
   // flex-wrap: nowrap;
   justify-content: center;
-  .home-item { 
-    max-width: 500px;
-    width: 50%;
-    flex-grow: 1;
+  .home-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .card-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 250px;
+      height: 250px;
+      div.home-label { 
+        width: 100%;
+        font-weight: bold;
+        font-size: 20px;
+        text-align: center;
+      }
+    }
   }
 }
 

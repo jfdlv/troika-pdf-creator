@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from "react";
 import {TextField, Container, Grid, Button, Paper} from '@mui/material';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
 import {Document, pdf} from '@react-pdf/renderer';
 import {
     Route,
@@ -15,29 +24,32 @@ import EditCharacter from "./EditCharacter";
 import "./CharacterGenerator.scss";
 import isEmpty from "lodash/isEmpty";
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
 export default function CharacterGenerator() {
 
     const { state, actions } = React.useContext(Store);
+    
+    const [openDialog, setOpenDialog] = React.useState(false);
 
-    const [backgrounds, setBackgrounds] = useState([]);
+    // const [backgrounds, setBackgrounds] = useState([]);
 
     const [damageTable,setDamageTable] = useState([]);
 
-    const [characterName, setCharacterName] = useState("");
+    const  [showSpinner, setShowSpinner] = useState(false);
+  
+    const [errorMessage, setErrorMessage] = useState("");
 
     const history = useHistory();
 
     let { path, url } = useRouteMatch();
 
     useEffect(()=>{
-        actions.getBackgrounds();
-    },[]);
-
-    useEffect(()=>{
         if(state.backgrounds.length>0) {
-            setBackgrounds(state.backgrounds)
+            generateNewCharacter();
         }
-        console.log(state.backgrounds);
 
     },[state.backgrounds])
 
@@ -52,7 +64,20 @@ export default function CharacterGenerator() {
        return Math.floor(Math.random() * (1 + dice - 1)) + 1
     }
 
-    const generatePdf = () => {
+    const handleOpen = () => {
+        setOpenDialog(true);
+    }
+
+    const handleClose = () => {
+        setOpenDialog(false);
+    }
+
+    const saveCharacter = () => {
+        setOpenDialog(false);
+        actions.addCharacter({ setShowSpinner, setErrorMessage, goToCharacters: ()=>{ history.push("/userCharacters")} });
+    }
+
+    const printPdf = () => {
 
         let template = CharacterSheetTemplate(state.characterInfo, damageTable);
 
@@ -65,16 +90,16 @@ export default function CharacterGenerator() {
         });
     }
 
-    let goToSetupView =() =>{
+    let generateNewCharacter =() =>{
         let characterInfo = {};
         let skill = throwDice(3)+3;
         let stamina = throwDice(6) + throwDice(6) + 12;
         let luck = throwDice(6) + 6;
         const baselinePossessions = ["a knife","a lantern & flasf of oil", "a rucksack","6 provisions"];
         let randomNumber0to36 = throwDice(36) - 1;
-        let background = Object.assign({}, backgrounds[randomNumber0to36]);
+        let background = Object.assign({}, state.backgrounds[randomNumber0to36]);
 
-        characterInfo.name = characterName;
+        characterInfo.name = "";
         characterInfo.skill = skill;
         characterInfo.stamina = stamina;
         characterInfo.luck = luck;
@@ -84,14 +109,13 @@ export default function CharacterGenerator() {
         characterInfo.background.possessions = characterInfo.background.possessions.concat(characterInfo.baselinePossessions)
         console.log(characterInfo);
         actions.setCharacterInfo(characterInfo);
-        history.push(`${url}/editCharacter`);
     }
 
     return <React.Fragment>
         <Container className="character-generator-container" maxWidth={false}>
             <Grid container>
                 <Switch>
-                    <Route exact path={path}>
+                    {/* <Route exact path={path}>
                         <Container style={{marginTop: "10px"}}>
                             <Grid item md={12}>
                                 <Paper>
@@ -104,15 +128,33 @@ export default function CharacterGenerator() {
                                 </Grid>
                             </Grid>
                         </Container>
-                    </Route>
-                    <Route path={`${path}/editCharacter`}>
+                    </Route> */}
+                    {/* <Route path={`${path}/editCharacter`}> */}
+                    <Route exact path={path}>
                         <EditCharacter/>
+                        {errorMessage.length>0 && <Alert style={{marginTop: "10px"}} severity="error">{errorMessage}</Alert>}
                         <div className="button-container">
-                            <Button onClick={generatePdf} variant="outlined" color="secondary">Generate Character</Button>
+                            {showSpinner && <CircularProgress style={{height:"30px", width: "30px"}}/>}
+                            {state.currentUser && <Button onClick={handleOpen} variant="outlined" color="secondary">Save Character</Button>}
+                            <Button onClick={printPdf} variant="outlined" color="secondary">Print Character</Button>
                         </div>
                     </Route>
                 </Switch>
             </Grid>
+
+            <Dialog
+                open={openDialog}
+                TransitionComponent={Transition}
+                keepMounted
+                onClose={handleClose}
+                aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle> Save Character?</DialogTitle>
+                <DialogActions>
+                    <Button onClick={saveCharacter}>Yes</Button>
+                    <Button onClick={handleClose}>No</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     </React.Fragment>
 }

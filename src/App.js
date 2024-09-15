@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import Home from './components/Home/Home';
 import CharacterGenerator from './components/CharacterGenerator/CharacterGenerator';
 import Background from './components/Background/Background';
+import Register from "./components/Register/Register";
 import Login from './components/Login/Login';
 import LoginMenu from './components/Login/LoginMenu';
 import UserCharacters from "./components/Characters/UserCharacters";
@@ -41,6 +42,7 @@ export default function App() {
   const location = useLocation();
   const history = useHistory();
   const [openLogin, setOpenLogin] = React.useState(false);
+  const [openRegister, setOpenRegister] = React.useState(false);
 
 
 
@@ -67,14 +69,23 @@ export default function App() {
     setOpenLogin(false);
   };
 
+  const handleClickOpenRegister = () => {
+    setOpenRegister(true);
+  };
+
+  const handleCloseRegister = () => {
+    setOpenRegister(false);
+  };
+
   useEffect(()=>{
     actions.getDamageTable();
+    actions.getBackgrounds();
   },[])
 
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Box sx={{flexGrow: "1", height: "100%"}}>
+      <Box sx={{display:"flex", flexDirection: "column", alignItems: "center"}}>
           
           <AppBar position="sticky" className="navbar">
             <Toolbar>
@@ -92,6 +103,7 @@ export default function App() {
                 {getLabel()}
               </Typography>
               {!state.currentUser &&  <Button color="inherit" sx={{float:"right"}} onClick={handleClickOpenLogin}>Login</Button>}
+              {!state.currentUser &&  <Button color="inherit" sx={{float:"right"}} onClick={handleClickOpenRegister}>Register</Button>}
               {state.currentUser && <LoginMenu />}
             </Toolbar>
           </AppBar>
@@ -115,6 +127,7 @@ export default function App() {
           </Switch>
 
           <Login open={openLogin} setOpenLogin={setOpenLogin} handleClose={handleCloseLogin}/>
+          <Register open={openRegister} setOpenRegister={setOpenRegister} handleClose={handleCloseRegister}/>
       </Box>
     </ThemeProvider>
   );

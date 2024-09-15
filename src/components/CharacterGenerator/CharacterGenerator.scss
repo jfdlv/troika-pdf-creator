@@ -5,6 +5,16 @@
         display: flex;
         justify-content: flex-end;
         width: 100%;
+        margin-top: 10px;
+        div:first-child {
+            margin-right: 10px;
+        }
+        button:last-child {
+            margin-right: 0px;
+        }
+        button {
+            margin-right: 10px;
+        }
     }
 }
 

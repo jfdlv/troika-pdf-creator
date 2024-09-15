@@ -1,0 +1,10 @@
+.characters-container{
+  margin-top: 20px;
+  width: 80%;
+}
+
+@media (max-width: 800px) { 
+  .characters-container{
+    width: 98%;
+  }
+}

@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, {useEffect, useState} from 'react';
 import _ from "lodash";
 import {Grid, Paper} from '@mui/material';
 import {Store} from "../../AppState/Store";
@@ -9,6 +10,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import InventorySorter from '../CharacterGenerator/InventorySorter';
+import isEmpty from 'lodash/isEmpty';
+import {
+  useHistory
+} from "react-router-dom";
 
 // import { Page, Text, View, Document, StyleSheet} from '@react-pdf/renderer';
 
@@ -16,55 +21,63 @@ import "./VirtualCharacterSheet.scss";
 
 export default function VirtualCharacterSheet() {
     const { state, actions } = React.useContext(Store);
+    const [advancedSkillsObject, setAdvanceSkillsObject] = useState({});
+    const [weaponsArray, setWeaponsArray] = useState([]);
 
-    let advancedSkillsObject = {};
-    let weaponsArray = [];
-    let possessions = Object.assign([],state.characterInfo.background.possessions);
-
-    // state..background.possessions = characterInfo.background.possessions.concat(characterInfo.baselinePossessions)
-
-    for (var advancedSkill in state.characterInfo.background.advancedSkills) {
-        advancedSkillsObject[advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2')] = state.characterInfo.background.advancedSkills[advancedSkill];
-        let formattedSkill = advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
-        if(formattedSkill.includes("Fighting")){
-            let weaponName = formattedSkill.replace("Fighting","");
-            weaponName = weaponName.replace(" ","");
-            weaponsArray.push(weaponName);
-        }
-    }
+    const history = useHistory();
     
-    if(possessions.length < 12) {
-        let lengthDiff = 12 - possessions.length;
-        for(let i = 0; i<lengthDiff; i++){
-            possessions.push(' ');
+    useEffect(()=>{
+      if(isEmpty(state.characterInfo)) {
+        history.push("/userCharacters");
+      }
+    }, [])
+
+    useEffect(()=>{
+      if(!isEmpty(state.characterInfo)) {
+        let advancedSkillsObjectAux = {};
+        let weaponsArrayAux = [];
+        
+
+
+        for (var advancedSkill in state.characterInfo.background.advancedSkills) {
+            advancedSkillsObjectAux[advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2')] = state.characterInfo.background.advancedSkills[advancedSkill];
+            let formattedSkill = advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+            if(formattedSkill.includes("Fighting")){
+                let weaponName = formattedSkill.replace("Fighting","");
+                weaponName = weaponName.replace(" ","");
+                weaponsArrayAux.push(weaponName);
+            }
         }
-    }
+        setAdvanceSkillsObject(advancedSkillsObjectAux)
+        setWeaponsArray(weaponsArrayAux);
+      }
+    }, [state.characterInfo])
 
-    console.log(state.damageTable);
-
-    return <div className="virtual-character-sheet">
-            <div className="container">
-              <div className="top-info-item" style={{minWidth: "50%", maxWidth: "100%"}}>
+    return !isEmpty(state.characterInfo) && <div className="virtual-character-sheet">
+            <div className="container"  style={!state.characterInfo.background.special ? {width: "100%"}: {}}>
+              <div className="top-info-item"  style={!state.characterInfo.background.special ? {width: "100%", maxWidth: "unset"}: {}}>
 
                 {/* <Paper  className="items-container"> */}
-                  <Grid item container spacing={2}>
-                    <Grid item md={6}>
+                  <Grid item container spacing={2} className="first-row"  style={!state.characterInfo.background.special ? {width: "100%"}: {}}>
+                    <Grid item className='item' md={6}  style={!state.characterInfo.background.special ? {width: "50%"}: {}}>
                       <Paper className='item-container'>
                         <div className='item-label'>Name: </div>
                         <div className='item-value' style={{textTransform: "capitalize"}}>{state.characterInfo.name}</div>
                       </Paper>
                     </Grid>
-                    <Grid item md={6}>
+                    <Grid item className='item' md={6}  style={!state.characterInfo.background.special ? {width: "50%"}: {}}>
                       <Paper className='item-container'>
                         <div className='item-label'>Background: </div>
-                        <div className='item-value' style={{textTransform: "capitalize"}}>{state.characterInfo.background.backgroundName.toLowerCase()}</div>
+                        <div className='item-value' style={{textTransform: "capitalize"}}>
+                          {state.characterInfo.background.backgroundName.toLowerCase()}
+                        </div>
                       </Paper>
                     </Grid>
                   </Grid>
                 {/* </Paper> */}
 
                 <Grid spacing={4} container item style={{marginTop: "1px"}}>
-                    <Grid item md={4}>
+                    <Grid item className='item' md={4}>
                       <Paper className='item-container'>
                         {/* <Grid md={12}> */}
                             <div className='item-label'>
@@ -78,7 +91,7 @@ export default function VirtualCharacterSheet() {
                         {/* </Grid> */}
                       </Paper>
                     </Grid>
-                    <Grid item md={4}>
+                    <Grid item className='item' md={4}>
                       <Paper className='item-container'>
                         {/* <Grid md={12}> */}
                             <div className='item-label'>
@@ -92,7 +105,7 @@ export default function VirtualCharacterSheet() {
                         {/* </Grid> */}
                       </Paper>
                     </Grid>
-                    <Grid item md={4}>
+                    <Grid item className='item' md={4}>
                       <Paper className='item-container'>
                         {/* <Grid md={12}> */}
                             <div className='item-label'>
