@@ -1,28 +1,17 @@
 import React from 'react';
-import * as ReactDOMClient from 'react-dom/client';
-import './index.scss';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { store } from './store';
 import App from './App';
-// import * as serviceWorker from './serviceWorker';
-import { StoreProvider } from '../src/AppState/Store';
+import './index.scss';
 
-import {
-  BrowserRouter
-} from "react-router-dom";
-
-const container = document.getElementById('root');
-
-// Create a root.
-const root = ReactDOMClient.createRoot(container);
+const root = createRoot(document.getElementById('root'));
 
 root.render(
-  <BrowserRouter>
-    <StoreProvider>
+  <Provider store={store}>
+    <BrowserRouter>
       <App />
-    </StoreProvider>
-  </BrowserRouter>
+    </BrowserRouter>
+  </Provider>
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-// serviceWorker.unregister();
