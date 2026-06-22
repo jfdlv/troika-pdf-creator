@@ -51,10 +51,16 @@ export function generateCharacterSheetPdf(characterInfo, damageTable) {
   const statW = 60;
   const statsTotal = 3 * statW + 2 * 6;
   const specialW = contentWidth - statsTotal - 8;
+  const specialX = margin + statsTotal + 8;
+
+  // Compute special text first so the row height can flex around it
+  doc.setFontSize(7);
+  const specialLines = doc.splitTextToSize(characterInfo.background?.special || '', specialW - 8);
+  const rowH = Math.max(38, specialLines.length * 8 + 24);
 
   [['Skill', characterInfo.skill], ['Stamina', characterInfo.stamina], ['Luck', characterInfo.luck]].forEach(([label, value], i) => {
     const x = margin + i * (statW + 6);
-    doc.rect(x, y, statW, 38);
+    doc.rect(x, y, statW, rowH);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
     doc.text(label, x + statW / 2, y + 10, { align: 'center' });
@@ -63,17 +69,15 @@ export function generateCharacterSheetPdf(characterInfo, damageTable) {
     doc.text(String(value ?? ''), x + statW / 2, y + 30, { align: 'center' });
   });
 
-  const specialX = margin + statsTotal + 8;
-  doc.rect(specialX, y, specialW, 38);
+  doc.rect(specialX, y, specialW, rowH);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.text('Special', specialX + 4, y + 10);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  const specialLines = doc.splitTextToSize(characterInfo.background?.special || '', specialW - 8);
   doc.text(specialLines, specialX + 4, y + 20);
 
-  y += 48;
+  y += rowH + 10;
 
   // --- Weapons / Attacks table ---
   if (weaponsArray.length > 0) {
@@ -127,7 +131,8 @@ export function generateCharacterSheetPdf(characterInfo, damageTable) {
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.text('Inventory', invX + colW / 2, twoColStartY + 10, { align: 'center' });
-  doc.rect(invX, twoColStartY, colW, advEndY - twoColStartY > 0 ? advEndY - twoColStartY : 200);
+  const invH = Math.max(advEndY - twoColStartY, 22 + possessions.length * 14 + 4);
+  doc.rect(invX, twoColStartY, colW, invH);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
