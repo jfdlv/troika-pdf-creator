@@ -51,6 +51,24 @@ state.data.damageTable          // object from Firestore "util/damageTable"
 
 Auth listener lives in `App.js` — `onAuthStateChanged` dispatches `setCurrentUser({ uid, email })`.
 
+## Components
+
+| Component | Description |
+|---|---|
+| `Home/Home` | Landing page with navigation cards to character creation, backgrounds, admin background management, and initiative. |
+| `Login/Login` | Dialog-based login form with email/password fields and error handling. |
+| `Login/LoginMenu` | Topbar profile button showing the logged-in email; opens a menu with links to characters and logout. |
+| `Register/Register` | Dialog-based registration form with email, password, and confirmation validation. |
+| `Background/Background` | Admin form for creating/editing a background: name, description, possessions, advanced skills, and a d6 mien table. |
+| `BackgroundsList/BackgroundsList` | Searchable list of all backgrounds; opens a detail dialog with full stats. |
+| `Characters/UserCharacters` | Table of the current user's saved characters fetched from Firestore. |
+| `Characters/VirtualCharacterSheet` | Interactive character sheet for editing skill ranks, weapon damage, and inventory in-session (not yet saved to Firestore). |
+| `CharacterGenerator/CharacterGenerator` | Core character creation flow — rolls dice-based stats, lets the user pick a background, and exports a PDF. |
+| `CharacterGenerator/EditCharacter` | Sub-form within the generator for editing name, background notes, possessions, and advanced skills. |
+| `CharacterGenerator/InventorySorter` | Drag-and-drop reordering of character possessions using `@hello-pangea/dnd`. |
+| `Initiative/Initiative` | Combat initiative tracker: setup phase to add characters/enemies, then a token-draw phase with round management and the Delay rule (6.4). |
+| `util/Error` | Small utility component for rendering error alerts. |
+
 ## Adding a New Component
 
 1. Create `src/components/ComponentName/ComponentName.js`

@@ -101,6 +101,17 @@ const Initiative = () => {
     setIsEndOfRound(token.type === 'endOfRound');
   };
 
+  const delayToken = () => {
+    if (!drawnToken || drawnToken.type !== 'character') return;
+    setStack((prev) => {
+      const insertAt = Math.floor(Math.random() * (prev.length + 1));
+      const next = [...prev];
+      next.splice(insertAt, 0, drawnToken);
+      return next;
+    });
+    setDrawnToken(null);
+  };
+
   const startNewRound = () => {
     setStack(buildStack(characters, enemies, enemyLimitEnabled));
     setDrawnToken(null);
@@ -277,6 +288,12 @@ const Initiative = () => {
           >
             <span className="drawn-label">{drawnToken.label}</span>
           </div>
+
+          {drawnToken.type === 'character' && !isEndOfRound && (
+            <Button variant="outlined" onClick={delayToken} className="delay-button">
+              Delay — put token back
+            </Button>
+          )}
 
           {isEndOfRound && (
             <div className="end-of-round-info">
