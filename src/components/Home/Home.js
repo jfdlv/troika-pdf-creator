@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import Card from '@mui/material/Card';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import DescriptionIcon from '@mui/icons-material/Description';
+import CasinoIcon from '@mui/icons-material/Casino';
 
 import "./Home.scss";
 
@@ -27,6 +28,12 @@ export default function Home() {
           </Card>
         </div>
       )}
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/initiative')}>
+          <CasinoIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Initiative</div>
+        </Card>
+      </div>
     </div>
   );
 }

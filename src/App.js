@@ -13,6 +13,7 @@ import Login from './components/Login/Login';
 import LoginMenu from './components/Login/LoginMenu';
 import UserCharacters from "./components/Characters/UserCharacters";
 import VirtualCharacterSheet from "./components/Characters/VirtualCharacterSheet";
+import Initiative from './components/Initiative/Initiative';
 
 import './App.scss';
 
@@ -63,6 +64,7 @@ export default function App() {
       case "/characterGen": return "Character Generator";
       case "/characterGen/editCharacter": return "Edit your character";
       case "/background": return "Background Creator";
+      case "/initiative": return "Initiative";
       default: return "";
     }
   };
@@ -97,6 +99,7 @@ export default function App() {
           <Route path="/userCharacters" element={<UserCharacters />} />
           <Route path="/characterGen/*" element={<CharacterGenerator />} />
           <Route path="/background" element={<Background />} />
+          <Route path="/initiative" element={<Initiative />} />
           <Route path="/" element={<Home />} />
         </Routes>
 

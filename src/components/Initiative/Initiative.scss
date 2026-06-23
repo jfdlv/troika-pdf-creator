@@ -1,0 +1,263 @@
+.initiative-container {
+  max-width: 620px;
+  margin: 24px auto;
+  padding: 0 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.initiative-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+}
+
+.initiative-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.6;
+  }
+}
+
+.initiative-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.initiative-number-input {
+  width: 100px;
+}
+
+.initiative-hint {
+  font-size: 12px;
+  opacity: 0.55;
+  margin: 4px 0 0;
+}
+
+// --- Color picker ---
+
+.color-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+  outline: none;
+
+  &:hover {
+    transform: scale(1.25);
+  }
+
+  &.selected {
+    border-color: #fff;
+    transform: scale(1.25);
+  }
+}
+
+// --- Lists ---
+
+.token-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+}
+
+.token-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.enemy {
+    background-color: #616161;
+  }
+}
+
+.token-count {
+  opacity: 0.55;
+  font-size: 12px;
+}
+
+.start-button {
+  align-self: center;
+  min-width: 180px !important;
+}
+
+// --- Playing phase: stack ---
+
+.stack-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.stack-pile {
+  position: relative;
+  width: 160px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pile-dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pile-empty {
+  font-size: 13px;
+  opacity: 0.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stack-count {
+  font-size: 14px;
+  opacity: 0.65;
+  margin: 0;
+}
+
+.draw-button {
+  min-width: 160px !important;
+}
+
+// --- Drawn token ---
+
+.drawn-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+@keyframes tokenReveal {
+  0% {
+    transform: scale(0.15) rotate(-20deg);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.18) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes endOfRoundPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(249, 167, 37, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(249, 167, 37, 0);
+  }
+}
+
+.drawn-token {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tokenReveal 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+  &.end-of-round-token {
+    animation:
+      tokenReveal 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+      endOfRoundPulse 1.6s ease-in-out 0.42s infinite;
+  }
+}
+
+.drawn-label {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  padding: 12px;
+  line-height: 1.3;
+}
+
+// --- End of round info ---
+
+.end-of-round-info {
+  text-align: center;
+  width: 100%;
+
+  p {
+    opacity: 0.75;
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+}
+
+.removal-lists {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+
+  h4 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.55;
+  }
+}
+
+.removal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 4px;
+  justify-content: flex-start;
+}
+
+.reset-button {
+  align-self: center;
+  margin-top: 8px;
+}
