@@ -2,12 +2,15 @@ import React, { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { database } from './config/firebase';
 import { setCurrentUser } from './store/authSlice';
 import { getDamageTableThunk, getBackgroundsThunk } from './store/dataSlice';
 
 import Home from './components/Home/Home';
 import CharacterGenerator from './components/CharacterGenerator/CharacterGenerator';
 import Background from './components/Background/Background';
+import BackgroundsList from './components/BackgroundsList/BackgroundsList';
 import Register from "./components/Register/Register";
 import Login from './components/Login/Login';
 import LoginMenu from './components/Login/LoginMenu';
@@ -43,9 +46,14 @@ export default function App() {
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        dispatch(setCurrentUser({ uid: firebaseUser.uid, email: firebaseUser.email }));
+        const adminSnap = await getDoc(doc(database, 'admins', firebaseUser.uid));
+        dispatch(setCurrentUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          isAdmin: adminSnap.exists(),
+        }));
       } else {
         dispatch(setCurrentUser(null));
       }
@@ -63,7 +71,8 @@ export default function App() {
       case "/": return "Troika Toolkit";
       case "/characterGen": return "Character Generator";
       case "/characterGen/editCharacter": return "Edit your character";
-      case "/background": return "Background Creator";
+      case "/background": return "Add Background";
+      case "/backgrounds": return "Backgrounds";
       case "/initiative": return "Initiative";
       default: return "";
     }
@@ -98,6 +107,7 @@ export default function App() {
           <Route path="/virtualSheet" element={<VirtualCharacterSheet />} />
           <Route path="/userCharacters" element={<UserCharacters />} />
           <Route path="/characterGen/*" element={<CharacterGenerator />} />
+          <Route path="/backgrounds" element={<BackgroundsList />} />
           <Route path="/background" element={<Background />} />
           <Route path="/initiative" element={<Initiative />} />
           <Route path="/" element={<Home />} />

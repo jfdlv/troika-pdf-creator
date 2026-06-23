@@ -5,6 +5,7 @@ import Card from '@mui/material/Card';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CasinoIcon from '@mui/icons-material/Casino';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 import "./Home.scss";
 
@@ -20,7 +21,13 @@ export default function Home() {
           <div className="home-label">Create Character</div>
         </Card>
       </div>
-      {currentUser && (
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/backgrounds')}>
+          <MenuBookIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Backgrounds</div>
+        </Card>
+      </div>
+      {currentUser?.isAdmin && (
         <div className='home-item'>
           <Card variant="outlined" className='card-item' onClick={() => navigate('/background')}>
             <DescriptionIcon style={{ fontSize: "150px" }} />

@@ -128,24 +128,42 @@ export function generateCharacterSheetPdf(characterInfo, damageTable) {
 
   // Inventory (right column)
   const invX = margin + colW + 10;
+  const invLineH = 9;
+  const invMaxTextW = colW - 24;
+
+  // Pre-compute wrapped lines so rect height can flex around content
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  const invItemLines = possessions.map(item =>
+    item ? doc.splitTextToSize(item.toLowerCase(), invMaxTextW) : null
+  );
+  const invContentH = 22 + invItemLines.reduce((sum, lines) =>
+    sum + (lines ? Math.max(14, lines.length * invLineH + 5) : 14), 0
+  ) + 4;
+
+  const invH = Math.max(advEndY - twoColStartY, invContentH);
+  doc.rect(invX, twoColStartY, colW, invH);
+
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
   doc.text('Inventory', invX + colW / 2, twoColStartY + 10, { align: 'center' });
-  const invH = Math.max(advEndY - twoColStartY, 22 + possessions.length * 14 + 4);
-  doc.rect(invX, twoColStartY, colW, invH);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
+  let invY = twoColStartY + 22;
   possessions.forEach((item, i) => {
-    const itemY = twoColStartY + 22 + i * 14;
-    doc.text(`${i + 1}.`, invX + 4, itemY);
-    if (item) {
-      doc.text(item.toLowerCase(), invX + 20, itemY - 1);
+    const lines = invItemLines[i];
+    const rowH = lines ? Math.max(14, lines.length * invLineH + 5) : 14;
+    doc.text(`${i + 1}.`, invX + 4, invY);
+    if (lines) {
+      doc.text(lines, invX + 20, invY - 1);
     }
-    doc.line(invX + 18, itemY + 1, invX + colW - 4, itemY + 1);
+    const ruleY = invY + (lines ? (lines.length - 1) * invLineH : 0) + 2;
+    doc.line(invX + 18, ruleY, invX + colW - 4, ruleY);
+    invY += rowH;
   });
 
-  y = Math.max(advEndY, twoColStartY + 22 + 12 * 14) + 12;
+  y = Math.max(advEndY, twoColStartY + invContentH) + 12;
 
   // --- Notes / Mien section ---
   const notesH = 90;

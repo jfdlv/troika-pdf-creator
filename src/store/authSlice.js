@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { auth, database } from '../config/firebase';
 
 export const loginThunk = createAsyncThunk(
@@ -28,6 +28,19 @@ export const registerThunk = createAsyncThunk(
 export const signOutThunk = createAsyncThunk('auth/signOut', async () => {
   await signOut(auth);
 });
+
+export const updateCharacterThunk = createAsyncThunk(
+  'auth/updateCharacter',
+  async ({ uid, characterInfo }, { rejectWithValue }) => {
+    try {
+      const { id, ...data } = characterInfo;
+      const docRef = doc(database, 'userCharacters', uid, 'characters', id);
+      await updateDoc(docRef, data);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const addCharacterThunk = createAsyncThunk(
   'auth/addCharacter',
