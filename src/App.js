@@ -18,6 +18,7 @@ import VirtualCharacterSheet from "./components/Characters/VirtualCharacterSheet
 import Initiative from './components/Initiative/Initiative';
 import Bestiary from './components/Bestiary/Bestiary';
 
+import ParticlesBackground from './components/ParticlesBackground/ParticlesBackground';
 import './App.scss';
 
 import Box from '@mui/material/Box';
@@ -82,6 +83,7 @@ export default function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
+      <ParticlesBackground />
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <AppBar position="sticky" className="navbar">
           <Toolbar>
