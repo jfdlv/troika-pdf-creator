@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [Refactor_vite_redux_jspdf]
+    branches: [master]
 
 jobs:
   deploy:
