@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Container, Grid, TextField, Button, Paper,
+  Grid, TextField, Button, Paper,
   List, ListItem, ListItemText, IconButton,
-  Alert, CircularProgress,
+  Alert, CircularProgress, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { addBackgroundThunk } from '../../store/dataSlice';
+import { addBackgroundThunk, updateBackgroundThunk } from '../../store/dataSlice';
 import { generateBackgroundPdf } from '../../pdf-templates/BackgroundTemplate';
 import './Background.scss';
 
@@ -37,9 +37,10 @@ const emptyState = () => ({
   mien: [...emptyMien],
 });
 
-export default function Background() {
+export default function Background({ editId, onClose }) {
   const dispatch = useDispatch();
-  const currentUser = useSelector((state) => state.auth.currentUser);
+  const backgrounds = useSelector((state) => state.data.backgrounds);
+  const editTarget = editId ? backgrounds.find((b) => b.id === editId) : null;
 
   const [form, setForm] = useState(emptyState());
   const [skillName, setSkillName] = useState('');
@@ -48,15 +49,24 @@ export default function Background() {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
 
-  if (!currentUser?.isAdmin) {
-    return (
-      <Container className="background-container">
-        <Alert severity="error" style={{ marginTop: 24 }}>
-          You don&apos;t have permission to access this page.
-        </Alert>
-      </Container>
-    );
-  }
+  useEffect(() => {
+    setSaveStatus(null);
+    if (editTarget) {
+      const mienPadded = [...(editTarget.mien || [])];
+      while (mienPadded.length < 6) mienPadded.push('');
+      setForm({
+        backgroundName: editTarget.backgroundName || '',
+        description: editTarget.description || '',
+        possessions: editTarget.possessions || [],
+        advancedSkills: editTarget.advancedSkills || {},
+        special: editTarget.special || '',
+        mien: mienPadded,
+      });
+    } else {
+      setForm(emptyState());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   const setField = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -103,9 +113,12 @@ export default function Background() {
         backgroundName: form.backgroundName.trim(),
         mien: form.mien.filter(Boolean),
       };
-      await dispatch(addBackgroundThunk(payload)).unwrap();
-      setSaveStatus({ type: 'success', message: 'Background saved to database.' });
-      setForm(emptyState());
+      if (editId) {
+        await dispatch(updateBackgroundThunk({ id: editId, ...payload })).unwrap();
+      } else {
+        await dispatch(addBackgroundThunk(payload)).unwrap();
+      }
+      onClose();
     } catch {
       setSaveStatus({ type: 'error', message: 'Failed to save. Try again.' });
     } finally {
@@ -118,159 +131,155 @@ export default function Background() {
   };
 
   return (
-    <Container className="background-container">
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <h2>Add Background</h2>
-        </Grid>
+    <>
+      <DialogTitle>{editId ? 'Edit Background' : 'Add Background'}</DialogTitle>
 
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Background Name</h3>
-            <TextField
-              fullWidth
-              size="small"
-              value={form.backgroundName}
-              onChange={(e) => setField('backgroundName', e.target.value)}
-            />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Description</h3>
-            <TextField
-              fullWidth
-              size="small"
-              multiline
-              rows={4}
-              value={form.description}
-              onChange={(e) => setField('description', e.target.value)}
-            />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Special Ability</h3>
-            <TextField
-              fullWidth
-              size="small"
-              multiline
-              rows={3}
-              value={form.special}
-              onChange={(e) => setField('special', e.target.value)}
-            />
-          </Paper>
-        </Grid>
-
-        {/* Possessions */}
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Possessions</h3>
-            <div className="bg-row">
-              <TextField
-                label="Item"
-                size="small"
-                value={possession}
-                onChange={(e) => setPossession(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addPossession()}
-                className="bg-input-grow"
-              />
-              <Button variant="contained" onClick={addPossession}>Add</Button>
-            </div>
-            <List dense>
-              {form.possessions.map((item, i) => (
-                <ListItem
-                  key={i}
-                  secondaryAction={
-                    <IconButton size="small" onClick={() => removePossession(i)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  }
-                >
-                  <ListItemText primary={item} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Advanced Skills */}
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Advanced Skills</h3>
-            <div className="bg-row">
-              <TextField
-                label="Skill name"
-                size="small"
-                value={skillName}
-                onChange={(e) => setSkillName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                className="bg-input-grow"
-              />
-              <TextField
-                label="Level"
-                type="number"
-                size="small"
-                value={skillLevel}
-                onChange={(e) => setSkillLevel(e.target.value)}
-                inputProps={{ min: 1 }}
-                className="bg-input-short"
-              />
-              <Button variant="contained" onClick={addSkill}>Add</Button>
-            </div>
-            <List dense>
-              {Object.entries(form.advancedSkills).map(([key, value]) => (
-                <ListItem
-                  key={key}
-                  secondaryAction={
-                    <IconButton size="small" onClick={() => removeSkill(key)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  }
-                >
-                  <ListItemText primary={`${value}  ${formatSkillName(key)}`} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Mien (d6 table) */}
-        <Grid item xs={12}>
-          <Paper className="bg-section">
-            <h3>Mien (d6 table)</h3>
-            <div className="bg-mien-grid">
-              {form.mien.map((entry, i) => (
-                <TextField
-                  key={i}
-                  label={String(i + 1)}
-                  size="small"
-                  value={entry}
-                  onChange={(e) => setMienEntry(i, e.target.value)}
-                />
-              ))}
-            </div>
-          </Paper>
-        </Grid>
-
-        {saveStatus && (
+      <DialogContent dividers className="background-dialog-content">
+        <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Alert severity={saveStatus.type}>{saveStatus.message}</Alert>
+            <Paper className="bg-section">
+              <h3>Background Name</h3>
+              <TextField
+                fullWidth
+                size="small"
+                value={form.backgroundName}
+                onChange={(e) => setField('backgroundName', e.target.value)}
+              />
+            </Paper>
           </Grid>
-        )}
 
-        <Grid item xs={12} className="bg-actions">
-          {saving && <CircularProgress size={24} />}
-          <Button variant="outlined" onClick={handlePrint}>
-            Print PDF
-          </Button>
-          <Button variant="contained" onClick={handleSave} disabled={saving}>
-            Save to Database
-          </Button>
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Description</h3>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={4}
+                value={form.description}
+                onChange={(e) => setField('description', e.target.value)}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Special Ability</h3>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={3}
+                value={form.special}
+                onChange={(e) => setField('special', e.target.value)}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Possessions</h3>
+              <div className="bg-row">
+                <TextField
+                  label="Item"
+                  size="small"
+                  value={possession}
+                  onChange={(e) => setPossession(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addPossession()}
+                  className="bg-input-grow"
+                />
+                <Button variant="contained" onClick={addPossession}>Add</Button>
+              </div>
+              <List dense>
+                {form.possessions.map((item, i) => (
+                  <ListItem
+                    key={i}
+                    secondaryAction={
+                      <IconButton size="small" onClick={() => removePossession(i)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText primary={item} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Advanced Skills</h3>
+              <div className="bg-row">
+                <TextField
+                  label="Skill name"
+                  size="small"
+                  value={skillName}
+                  onChange={(e) => setSkillName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addSkill()}
+                  className="bg-input-grow"
+                />
+                <TextField
+                  label="Level"
+                  type="number"
+                  size="small"
+                  value={skillLevel}
+                  onChange={(e) => setSkillLevel(e.target.value)}
+                  inputProps={{ min: 1 }}
+                  className="bg-input-short"
+                />
+                <Button variant="contained" onClick={addSkill}>Add</Button>
+              </div>
+              <List dense>
+                {Object.entries(form.advancedSkills).map(([key, value]) => (
+                  <ListItem
+                    key={key}
+                    secondaryAction={
+                      <IconButton size="small" onClick={() => removeSkill(key)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText primary={`${value}  ${formatSkillName(key)}`} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Mien (d6 table)</h3>
+              <div className="bg-mien-grid">
+                {form.mien.map((entry, i) => (
+                  <TextField
+                    key={i}
+                    label={String(i + 1)}
+                    size="small"
+                    value={entry}
+                    onChange={(e) => setMienEntry(i, e.target.value)}
+                  />
+                ))}
+              </div>
+            </Paper>
+          </Grid>
+
+          {saveStatus && (
+            <Grid item xs={12}>
+              <Alert severity={saveStatus.type}>{saveStatus.message}</Alert>
+            </Grid>
+          )}
         </Grid>
-      </Grid>
-    </Container>
+      </DialogContent>
+
+      <DialogActions>
+        {saving && <CircularProgress size={24} />}
+        <Button onClick={handlePrint}>Print PDF</Button>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" onClick={handleSave} disabled={saving}>
+          {editId ? 'Update' : 'Save'}
+        </Button>
+      </DialogActions>
+    </>
   );
 }

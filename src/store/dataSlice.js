@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { doc, collection, getDocs, getDoc, addDoc } from 'firebase/firestore';
+import { doc, collection, getDocs, getDoc, addDoc, setDoc } from 'firebase/firestore';
 import { database } from '../config/firebase';
 
 export const getBackgroundsThunk = createAsyncThunk('data/getBackgrounds', async () => {
@@ -37,6 +37,30 @@ export const addBeastThunk = createAsyncThunk(
   async (beastData, { dispatch, rejectWithValue }) => {
     try {
       await addDoc(collection(database, 'bestiary'), beastData);
+      await dispatch(getBestiaryThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateBackgroundThunk = createAsyncThunk(
+  'data/updateBackground',
+  async ({ id, ...backgroundData }, { dispatch, rejectWithValue }) => {
+    try {
+      await setDoc(doc(database, 'backgrounds', id), backgroundData);
+      await dispatch(getBackgroundsThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateBeastThunk = createAsyncThunk(
+  'data/updateBeast',
+  async ({ id, ...beastData }, { dispatch, rejectWithValue }) => {
+    try {
+      await setDoc(doc(database, 'bestiary', id), beastData);
       await dispatch(getBestiaryThunk());
     } catch (error) {
       return rejectWithValue(error.message);

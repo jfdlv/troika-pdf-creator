@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import Card from '@mui/material/Card';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
-import DescriptionIcon from '@mui/icons-material/Description';
 import CasinoIcon from '@mui/icons-material/Casino';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import PetsIcon from '@mui/icons-material/Pets';
@@ -28,14 +27,6 @@ export default function Home() {
           <div className="home-label">Backgrounds</div>
         </Card>
       </div>
-      {currentUser?.isAdmin && (
-        <div className='home-item'>
-          <Card variant="outlined" className='card-item' onClick={() => navigate('/background')}>
-            <DescriptionIcon style={{ fontSize: "150px" }} />
-            <div className="home-label">Add Background</div>
-          </Card>
-        </div>
-      )}
       <div className='home-item'>
         <Card variant="outlined" className='card-item' onClick={() => navigate('/initiative')}>
           <CasinoIcon style={{ fontSize: "150px" }} />
@@ -48,14 +39,6 @@ export default function Home() {
           <div className="home-label">Bestiary</div>
         </Card>
       </div>
-      {currentUser?.isAdmin && (
-        <div className='home-item'>
-          <Card variant="outlined" className='card-item' onClick={() => navigate('/beast')}>
-            <DescriptionIcon style={{ fontSize: "150px" }} />
-            <div className="home-label">Add Beast</div>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

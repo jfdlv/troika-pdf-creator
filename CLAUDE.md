@@ -52,24 +52,38 @@ state.data.damageTable          // object from Firestore "util/damageTable"
 
 Auth listener lives in `App.js` — `onAuthStateChanged` dispatches `setCurrentUser({ uid, email })`.
 
+## Routes
+
+| Path | Component | Notes |
+|---|---|---|
+| `/` | `Home/Home` | Landing page |
+| `/characterGen/*` | `CharacterGenerator/CharacterGenerator` | Multi-step character creation |
+| `/backgrounds` | `BackgroundsList/BackgroundsList` | List + add/edit modals |
+| `/bestiary` | `Bestiary/Bestiary` | List + add/edit modals |
+| `/initiative` | `Initiative/Initiative` | Initiative tracker |
+| `/virtualSheet` | `Characters/VirtualCharacterSheet` | In-session character sheet |
+| `/userCharacters` | `Characters/UserCharacters` | Saved characters table |
+
+There are no standalone add/edit routes for backgrounds or beasts — those forms open as MUI Dialogs from within their list pages.
+
 ## Components
 
 | Component | Description |
 |---|---|
-| `Home/Home` | Landing page with navigation cards to character creation, backgrounds, admin background management, and initiative. |
+| `Home/Home` | Landing page with navigation cards: Create Character, Backgrounds, Initiative, Bestiary. |
 | `Login/Login` | Dialog-based login form with email/password fields and error handling. |
 | `Login/LoginMenu` | Topbar profile button showing the logged-in email; opens a menu with links to characters and logout. |
 | `Register/Register` | Dialog-based registration form with email, password, and confirmation validation. |
-| `Background/Background` | Admin form for creating/editing a background: name, description, possessions, advanced skills, and a d6 mien table. |
-| `BackgroundsList/BackgroundsList` | Searchable list of all backgrounds; opens a detail dialog with full stats. |
+| `BackgroundsList/BackgroundsList` | Searchable list of all backgrounds. Opens a detail dialog per entry. Admin users see an "Add Background" button and an "Edit" button in the detail dialog; both open `Background/Background` as a modal. |
+| `Background/Background` | Add/edit form for a background: name, description, possessions, advanced skills, d6 mien table. Rendered inside a `Dialog` — accepts `editId` and `onClose` props. Uses `addBackgroundThunk` or `updateBackgroundThunk` depending on mode. |
+| `Bestiary/Bestiary` | Searchable list of all beasts. Opens a detail dialog per entry. Admin users see an "Add Beast" button and an "Edit" button in the detail dialog; both open `Beast/Beast` as a modal. |
+| `Beast/Beast` | Add/edit form for a beast entry: name, stats (Skill/Stamina/Initiative/Armour/Damage), d6 mien table, description, special section with optional damage table. Rendered inside a `Dialog` — accepts `editId` and `onClose` props. Uses `react-hook-form`. Uses `addBeastThunk` or `updateBeastThunk` depending on mode. |
 | `Characters/UserCharacters` | Table of the current user's saved characters fetched from Firestore. |
 | `Characters/VirtualCharacterSheet` | Interactive character sheet for editing skill ranks, weapon damage, and inventory in-session (not yet saved to Firestore). |
 | `CharacterGenerator/CharacterGenerator` | Core character creation flow — rolls dice-based stats, lets the user pick a background, and exports a PDF. |
 | `CharacterGenerator/EditCharacter` | Sub-form within the generator for editing name, background notes, possessions, and advanced skills. |
 | `CharacterGenerator/InventorySorter` | Drag-and-drop reordering of character possessions using `@hello-pangea/dnd`. |
 | `Initiative/Initiative` | Combat initiative tracker: setup phase to add characters/enemies, then a token-draw phase with round management and the Delay rule (6.4). |
-| `Bestiary/Bestiary` | Admin form for creating a beast entry: name, stats (Skill/Stamina/Initiative/Armour/Damage), d6 mien table, and description. Uses react-hook-form. |
-| `BestiaryList/BestiaryList` | Searchable list of all beasts from Firestore; opens a detail dialog showing stats, mien table, and description. |
 | `util/Error` | Small utility component for rendering error alerts. |
 
 ## Adding a New Component

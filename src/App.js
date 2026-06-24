@@ -9,7 +9,6 @@ import { getDamageTableThunk, getBackgroundsThunk, getBestiaryThunk } from './st
 
 import Home from './components/Home/Home';
 import CharacterGenerator from './components/CharacterGenerator/CharacterGenerator';
-import Background from './components/Background/Background';
 import BackgroundsList from './components/BackgroundsList/BackgroundsList';
 import Register from "./components/Register/Register";
 import Login from './components/Login/Login';
@@ -18,7 +17,6 @@ import UserCharacters from "./components/Characters/UserCharacters";
 import VirtualCharacterSheet from "./components/Characters/VirtualCharacterSheet";
 import Initiative from './components/Initiative/Initiative';
 import Bestiary from './components/Bestiary/Bestiary';
-import BestiaryList from './components/BestiaryList/BestiaryList';
 
 import './App.scss';
 
@@ -74,11 +72,9 @@ export default function App() {
       case "/": return "Troika Toolkit";
       case "/characterGen": return "Character Generator";
       case "/characterGen/editCharacter": return "Edit your character";
-      case "/background": return "Add Background";
       case "/backgrounds": return "Backgrounds";
       case "/initiative": return "Initiative";
       case "/bestiary": return "Bestiary";
-      case "/beast": return "Add Beast";
       default: return "";
     }
   };
@@ -113,10 +109,8 @@ export default function App() {
           <Route path="/userCharacters" element={<UserCharacters />} />
           <Route path="/characterGen/*" element={<CharacterGenerator />} />
           <Route path="/backgrounds" element={<BackgroundsList />} />
-          <Route path="/background" element={<Background />} />
+          <Route path="/bestiary" element={<Bestiary />} />
           <Route path="/initiative" element={<Initiative />} />
-          <Route path="/bestiary" element={<BestiaryList />} />
-          <Route path="/beast" element={<Bestiary />} />
           <Route path="/" element={<Home />} />
         </Routes>
 

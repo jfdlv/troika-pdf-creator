@@ -4,11 +4,17 @@
   padding: 0 16px 40px;
 }
 
+.bgl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 .bgl-title {
   font-size: 28px;
   font-weight: bold;
-  margin: 0 0 16px;
-
+  margin: 0;
 }
 
 .bgl-search {

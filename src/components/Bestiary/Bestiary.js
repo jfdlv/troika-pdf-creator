@@ -1,307 +1,178 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import {
-  Container, Grid, TextField, Button, Paper,
-  IconButton, Alert, CircularProgress,
+  List, ListItemButton, ListItemText,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, TextField, Divider,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { addBeastThunk } from '../../store/dataSlice';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import Beast from '../Beast/Beast';
 import './Bestiary.scss';
 
-const emptyMien = ['', '', '', '', '', ''];
-const DAMAGE_COLS = ['1', '2', '3', '4', '5', '6', '7+'];
-const emptyDamageRow = () => ({ label: '', values: ['', '', '', '', '', '', ''] });
-const emptySpecial = () => ({ description: '', notes: '', damageRows: [] });
+const StatRow = ({ label, value }) => (
+  <div className="bl-stat-row">
+    <span className="bl-stat-label">{label}</span>
+    <span className="bl-stat-value">{value}</span>
+  </div>
+);
 
-const Bestiary = () => {
-  const dispatch = useDispatch();
+export default function Bestiary() {
+  const bestiary = useSelector((state) => state.data.bestiary);
   const currentUser = useSelector((state) => state.auth.currentUser);
+  const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [formEditId, setFormEditId] = useState(null);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
-    defaultValues: {
-      name: '',
-      skill: '',
-      stamina: '',
-      initiative: '',
-      armour: '',
-      damage: '',
-      description: '',
-    },
-  });
+  const openAdd = () => { setFormEditId(null); setFormOpen(true); };
+  const openEdit = (id) => { setSelected(null); setFormEditId(id); setFormOpen(true); };
 
-  const [mien, setMien] = useState([...emptyMien]);
-  const [special, setSpecial] = useState(emptySpecial());
-  const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState(null);
+  const filtered = [...bestiary]
+    .filter((b) => b.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  if (!currentUser?.isAdmin) {
-    return (
-      <Container className="bestiary-container">
-        <Alert severity="error" style={{ marginTop: 24 }}>
-          You don&apos;t have permission to access this page.
-        </Alert>
-      </Container>
-    );
-  }
-
-  const setMienEntry = (index, value) => {
-    setMien((prev) => {
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  };
-
-  const addDamageRow = () =>
-    setSpecial((prev) => ({ ...prev, damageRows: [...prev.damageRows, emptyDamageRow()] }));
-
-  const removeDamageRow = (i) =>
-    setSpecial((prev) => ({ ...prev, damageRows: prev.damageRows.filter((_, idx) => idx !== i) }));
-
-  const updateDamageRowLabel = (i, value) =>
-    setSpecial((prev) => {
-      const rows = [...prev.damageRows];
-      rows[i] = { ...rows[i], label: value };
-      return { ...prev, damageRows: rows };
-    });
-
-  const updateDamageRowValue = (i, j, value) =>
-    setSpecial((prev) => {
-      const rows = [...prev.damageRows];
-      const values = [...rows[i].values];
-      values[j] = value;
-      rows[i] = { ...rows[i], values };
-      return { ...prev, damageRows: rows };
-    });
-
-  const onSubmit = async (values) => {
-    setSaving(true);
-    setSaveStatus(null);
-    try {
-      const hasSpecial = special.description || special.notes || special.damageRows.length > 0;
-      const payload = {
-        ...values,
-        skill: Number(values.skill),
-        stamina: Number(values.stamina),
-        initiative: Number(values.initiative),
-        armour: Number(values.armour),
-        mien: mien.filter(Boolean),
-        ...(hasSpecial ? {
-          special: {
-            description: special.description,
-            notes: special.notes,
-            damageTable: special.damageRows.map((row) => ({
-              label: row.label,
-              values: row.values.map((v) => (v === '' ? '' : Number(v))),
-            })),
-          },
-        } : {}),
-      };
-      await dispatch(addBeastThunk(payload)).unwrap();
-      setSaveStatus({ type: 'success', message: 'Beast saved to database.' });
-      reset();
-      setMien([...emptyMien]);
-      setSpecial(emptySpecial());
-    } catch {
-      setSaveStatus({ type: 'error', message: 'Failed to save. Try again.' });
-    } finally {
-      setSaving(false);
-    }
-  };
+  const mien = (selected?.mien || []).filter(Boolean);
 
   return (
-    <Container className="bestiary-container">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <h2>Add Beast</h2>
-          </Grid>
+    <div className="bl-container">
+      <div className="bl-header">
+        <h2 className="bl-title">Bestiary</h2>
+        {currentUser?.isAdmin && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small">
+            Add Beast
+          </Button>
+        )}
+      </div>
 
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Name</h3>
-              <TextField
-                fullWidth
-                size="small"
-                {...register('name', { required: 'Name is required' })}
-                error={Boolean(errors.name)}
-                helperText={errors.name?.message}
-              />
-            </Paper>
-          </Grid>
+      <TextField
+        fullWidth
+        label="Search beasts"
+        size="small"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="bl-search"
+      />
 
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Stats</h3>
-              <div className="bestiary-stats-grid">
-                <TextField
-                  label="Skill"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0 }}
-                  {...register('skill', { required: 'Required', min: { value: 0, message: 'Min 0' } })}
-                  error={Boolean(errors.skill)}
-                  helperText={errors.skill?.message}
-                />
-                <TextField
-                  label="Stamina"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0 }}
-                  {...register('stamina', { required: 'Required', min: { value: 0, message: 'Min 0' } })}
-                  error={Boolean(errors.stamina)}
-                  helperText={errors.stamina?.message}
-                />
-                <TextField
-                  label="Initiative"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0 }}
-                  {...register('initiative', { required: 'Required', min: { value: 0, message: 'Min 0' } })}
-                  error={Boolean(errors.initiative)}
-                  helperText={errors.initiative?.message}
-                />
-                <TextField
-                  label="Armour"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0 }}
-                  {...register('armour', { required: 'Required', min: { value: 0, message: 'Min 0' } })}
-                  error={Boolean(errors.armour)}
-                  helperText={errors.armour?.message}
-                />
-              </div>
-            </Paper>
-          </Grid>
+      <List className="bl-list">
+        {filtered.map((beast) => (
+          <ListItemButton
+            key={beast.id}
+            onClick={() => setSelected(beast)}
+            divider
+          >
+            <ListItemText
+              className="bl-list-item-text"
+              primary={beast.name}
+              secondary={`Skill ${beast.skill} · Stamina ${beast.stamina} · Initiative ${beast.initiative}`}
+            />
+          </ListItemButton>
+        ))}
+        {filtered.length === 0 && (
+          <p className="bl-empty">No beasts found.</p>
+        )}
+      </List>
 
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Damage</h3>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="e.g. As Large Beast, 2d6+4, etc."
-                {...register('damage', { required: 'Damage is required' })}
-                error={Boolean(errors.damage)}
-                helperText={errors.damage?.message}
-              />
-            </Paper>
-          </Grid>
+      {/* Detail dialog */}
+      <Dialog
+        open={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        maxWidth="sm"
+        fullWidth
+        scroll="paper"
+      >
+        {selected && (
+          <>
+            <DialogTitle className="bl-dialog-title">{selected.name}</DialogTitle>
 
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Mien (d6 table)</h3>
-              <div className="bg-mien-grid">
-                {mien.map((entry, i) => (
-                  <TextField
-                    key={i}
-                    label={String(i + 1)}
-                    size="small"
-                    value={entry}
-                    onChange={(e) => setMienEntry(i, e.target.value)}
-                  />
-                ))}
-              </div>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Description</h3>
-              <TextField
-                fullWidth
-                size="small"
-                multiline
-                rows={5}
-                {...register('description')}
-              />
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Paper className="bg-section">
-              <h3>Special</h3>
-              <TextField
-                fullWidth
-                size="small"
-                label="Description"
-                multiline
-                rows={3}
-                value={special.description}
-                onChange={(e) => setSpecial((prev) => ({ ...prev, description: e.target.value }))}
-              />
-
-              <div className="bestiary-damage-table-builder">
-                <div className="bestiary-damage-table-header">
-                  <span className="bestiary-damage-table-label">Damage Table</span>
-                  <Button size="small" onClick={addDamageRow}>+ Add Row</Button>
-                </div>
-
-                {special.damageRows.length > 0 && (
-                  <div className="bestiary-damage-cols-header">
-                    <span className="bestiary-damage-col-label-spacer" />
-                    {DAMAGE_COLS.map((col) => (
-                      <span key={col} className="bestiary-damage-col-heading">{col}</span>
-                    ))}
-                    <span className="bestiary-damage-col-delete-spacer" />
-                  </div>
-                )}
-
-                {special.damageRows.map((row, i) => (
-                  <div key={i} className="bestiary-damage-row">
-                    <TextField
-                      size="small"
-                      label="Label"
-                      className="bestiary-damage-row-label"
-                      value={row.label}
-                      onChange={(e) => updateDamageRowLabel(i, e.target.value)}
-                    />
-                    {row.values.map((val, j) => (
-                      <TextField
-                        key={j}
-                        size="small"
-                        className="bestiary-damage-col-value"
-                        value={val}
-                        onChange={(e) => updateDamageRowValue(i, j, e.target.value)}
-                      />
-                    ))}
-                    <IconButton size="small" onClick={() => removeDamageRow(i)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </div>
-                ))}
+            <DialogContent dividers className="bl-dialog-content">
+              <div className="bl-stats-block">
+                <StatRow label="Skill" value={selected.skill} />
+                <StatRow label="Stamina" value={selected.stamina} />
+                <StatRow label="Initiative" value={selected.initiative} />
+                <StatRow label="Armour" value={selected.armour} />
+                <StatRow label="Damage" value={selected.damage} />
               </div>
 
-              <TextField
-                fullWidth
-                size="small"
-                label="Notes"
-                multiline
-                rows={2}
-                style={{ marginTop: 12 }}
-                value={special.notes}
-                onChange={(e) => setSpecial((prev) => ({ ...prev, notes: e.target.value }))}
-              />
-            </Paper>
-          </Grid>
+              {mien.length > 0 && (
+                <>
+                  <Divider className="bl-divider" />
+                  <section>
+                    <h4 className="bl-section-heading">Mien (d6)</h4>
+                    <ol className="bl-mien-list">
+                      {mien.map((entry, i) => (
+                        <li key={i}>{entry}</li>
+                      ))}
+                    </ol>
+                  </section>
+                </>
+              )}
 
-          {saveStatus && (
-            <Grid item xs={12}>
-              <Alert severity={saveStatus.type}>{saveStatus.message}</Alert>
-            </Grid>
-          )}
+              {selected.description && (
+                <>
+                  <Divider className="bl-divider" />
+                  <p className="bl-description">{selected.description}</p>
+                </>
+              )}
 
-          <Grid item xs={12} className="bg-actions">
-            {saving && <CircularProgress size={24} />}
-            <Button variant="contained" type="submit" disabled={saving}>
-              Save to Database
-            </Button>
-          </Grid>
-        </Grid>
-      </form>
-    </Container>
+              {selected.special && (
+                <>
+                  <Divider className="bl-divider" />
+                  <section>
+                    <h4 className="bl-section-heading">Special</h4>
+                    {selected.special.description && (
+                      <p className="bl-description">{selected.special.description}</p>
+                    )}
+                    {selected.special.damageTable?.length > 0 && (
+                      <table className="bl-damage-table">
+                        <thead>
+                          <tr>
+                            <th>Damage Roll</th>
+                            {['1', '2', '3', '4', '5', '6', '7+'].map((col) => (
+                              <th key={col}>{col}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selected.special.damageTable.map((row, i) => (
+                            <tr key={i}>
+                              <td>{row.label}</td>
+                              {row.values.map((v, j) => <td key={j}>{v}</td>)}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                    {selected.special.notes && (
+                      <p className="bl-special-notes">{selected.special.notes}</p>
+                    )}
+                  </section>
+                </>
+              )}
+            </DialogContent>
+
+            <DialogActions>
+              {currentUser?.isAdmin && (
+                <Button startIcon={<EditIcon />} onClick={() => openEdit(selected.id)}>
+                  Edit
+                </Button>
+              )}
+              <Button variant="contained" onClick={() => setSelected(null)}>Close</Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+      {/* Add / Edit form dialog */}
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        maxWidth="md"
+        fullWidth
+        scroll="paper"
+      >
+        <Beast editId={formEditId} onClose={() => setFormOpen(false)} />
+      </Dialog>
+    </div>
   );
-};
-
-export default Bestiary;
+}

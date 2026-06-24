@@ -5,7 +5,10 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, Chip, Divider,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import { generateBackgroundPdf } from '../../pdf-templates/BackgroundTemplate';
+import Background from '../Background/Background';
 import './BackgroundsList.scss';
 
 const formatSkillName = (key) => {
@@ -15,8 +18,14 @@ const formatSkillName = (key) => {
 
 export default function BackgroundsList() {
   const backgrounds = useSelector((state) => state.data.backgrounds);
+  const currentUser = useSelector((state) => state.auth.currentUser);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [formEditId, setFormEditId] = useState(null);
+
+  const openAdd = () => { setFormEditId(null); setFormOpen(true); };
+  const openEdit = (id) => { setSelected(null); setFormEditId(id); setFormOpen(true); };
 
   const filtered = backgrounds
     .filter((b) =>
@@ -36,7 +45,14 @@ export default function BackgroundsList() {
 
   return (
     <div className="bgl-container">
-      <h2 className="bgl-title">Backgrounds</h2>
+      <div className="bgl-header">
+        <h2 className="bgl-title">Backgrounds</h2>
+        {currentUser?.isAdmin && (
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small">
+            Add Background
+          </Button>
+        )}
+      </div>
 
       <TextField
         fullWidth
@@ -66,6 +82,7 @@ export default function BackgroundsList() {
         )}
       </List>
 
+      {/* Detail dialog */}
       <Dialog
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
@@ -141,15 +158,27 @@ export default function BackgroundsList() {
             </DialogContent>
 
             <DialogActions>
-              <Button onClick={() => generateBackgroundPdf(selected)}>
-                Print PDF
-              </Button>
-              <Button variant="contained" onClick={() => setSelected(null)}>
-                Close
-              </Button>
+              {currentUser?.isAdmin && (
+                <Button startIcon={<EditIcon />} onClick={() => openEdit(selected.id)}>
+                  Edit
+                </Button>
+              )}
+              <Button onClick={() => generateBackgroundPdf(selected)}>Print PDF</Button>
+              <Button variant="contained" onClick={() => setSelected(null)}>Close</Button>
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Add / Edit form dialog */}
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        maxWidth="md"
+        fullWidth
+        scroll="paper"
+      >
+        <Background editId={formEditId} onClose={() => setFormOpen(false)} />
       </Dialog>
     </div>
   );
