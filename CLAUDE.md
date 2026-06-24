@@ -46,6 +46,7 @@ src/
 state.character.characterInfo   // current character being built/viewed
 state.auth.currentUser          // { uid, email } or null (not full Firebase user)
 state.data.backgrounds          // array from Firestore "backgrounds" collection
+state.data.bestiary             // array from Firestore "bestiary" collection
 state.data.damageTable          // object from Firestore "util/damageTable"
 ```
 
@@ -67,6 +68,8 @@ Auth listener lives in `App.js` — `onAuthStateChanged` dispatches `setCurrentU
 | `CharacterGenerator/EditCharacter` | Sub-form within the generator for editing name, background notes, possessions, and advanced skills. |
 | `CharacterGenerator/InventorySorter` | Drag-and-drop reordering of character possessions using `@hello-pangea/dnd`. |
 | `Initiative/Initiative` | Combat initiative tracker: setup phase to add characters/enemies, then a token-draw phase with round management and the Delay rule (6.4). |
+| `Bestiary/Bestiary` | Admin form for creating a beast entry: name, stats (Skill/Stamina/Initiative/Armour/Damage), d6 mien table, and description. Uses react-hook-form. |
+| `BestiaryList/BestiaryList` | Searchable list of all beasts from Firestore; opens a detail dialog showing stats, mien table, and description. |
 | `util/Error` | Small utility component for rendering error alerts. |
 
 ## Adding a New Component
@@ -82,8 +85,48 @@ Auth listener lives in `App.js` — `onAuthStateChanged` dispatches `setCurrentU
 ## Firebase
 
 - **DO NOT modify** `src/config/firebase.js`
-- No Firestore security rules complexity at this stage — keep reads/writes simple
-- Firestore collections: `backgrounds`, `util/damageTable`, `userCharacters/{uid}/characters`
+- Firestore collections: `backgrounds`, `bestiary`, `util/damageTable`, `userCharacters/{uid}/characters`, `admins`
+
+### Firestore Security Rules
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /backgrounds/{background} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    match /bestiary/{beast} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    match /util/damageTable {
+      allow read;
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /userCharacters/{userCharacter} {
+      allow read, write: if request.auth != null && request.auth.uid == userCharacter;
+
+      match /characters/{character} {
+        allow read, write: if request.auth != null && request.auth.uid == userCharacter;
+      }
+    }
+  }
+}
+```
 
 ## Deployment
 

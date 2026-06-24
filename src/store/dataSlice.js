@@ -23,6 +23,27 @@ export const addBackgroundThunk = createAsyncThunk(
   }
 );
 
+export const getBestiaryThunk = createAsyncThunk('data/getBestiary', async () => {
+  const beasts = [];
+  const querySnapshot = await getDocs(collection(database, 'bestiary'));
+  querySnapshot.forEach((snapshot) => {
+    beasts.push({ id: snapshot.id, ...snapshot.data() });
+  });
+  return beasts;
+});
+
+export const addBeastThunk = createAsyncThunk(
+  'data/addBeast',
+  async (beastData, { dispatch, rejectWithValue }) => {
+    try {
+      await addDoc(collection(database, 'bestiary'), beastData);
+      await dispatch(getBestiaryThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const getDamageTableThunk = createAsyncThunk('data/getDamageTable', async () => {
   const docRef = doc(database, 'util', 'damageTable');
   const snapshot = await getDoc(docRef);
@@ -31,12 +52,15 @@ export const getDamageTableThunk = createAsyncThunk('data/getDamageTable', async
 
 const dataSlice = createSlice({
   name: 'data',
-  initialState: { backgrounds: [], damageTable: {} },
+  initialState: { backgrounds: [], bestiary: [], damageTable: {} },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getBackgroundsThunk.fulfilled, (state, action) => {
         state.backgrounds = action.payload;
+      })
+      .addCase(getBestiaryThunk.fulfilled, (state, action) => {
+        state.bestiary = action.payload;
       })
       .addCase(getDamageTableThunk.fulfilled, (state, action) => {
         state.damageTable = action.payload;

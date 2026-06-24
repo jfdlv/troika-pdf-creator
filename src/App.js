@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { database } from './config/firebase';
 import { setCurrentUser } from './store/authSlice';
-import { getDamageTableThunk, getBackgroundsThunk } from './store/dataSlice';
+import { getDamageTableThunk, getBackgroundsThunk, getBestiaryThunk } from './store/dataSlice';
 
 import Home from './components/Home/Home';
 import CharacterGenerator from './components/CharacterGenerator/CharacterGenerator';
@@ -17,6 +17,8 @@ import LoginMenu from './components/Login/LoginMenu';
 import UserCharacters from "./components/Characters/UserCharacters";
 import VirtualCharacterSheet from "./components/Characters/VirtualCharacterSheet";
 import Initiative from './components/Initiative/Initiative';
+import Bestiary from './components/Bestiary/Bestiary';
+import BestiaryList from './components/BestiaryList/BestiaryList';
 
 import './App.scss';
 
@@ -64,6 +66,7 @@ export default function App() {
   useEffect(() => {
     dispatch(getDamageTableThunk());
     dispatch(getBackgroundsThunk());
+    dispatch(getBestiaryThunk());
   }, [dispatch]);
 
   const getLabel = () => {
@@ -74,6 +77,8 @@ export default function App() {
       case "/background": return "Add Background";
       case "/backgrounds": return "Backgrounds";
       case "/initiative": return "Initiative";
+      case "/bestiary": return "Bestiary";
+      case "/beast": return "Add Beast";
       default: return "";
     }
   };
@@ -110,6 +115,8 @@ export default function App() {
           <Route path="/backgrounds" element={<BackgroundsList />} />
           <Route path="/background" element={<Background />} />
           <Route path="/initiative" element={<Initiative />} />
+          <Route path="/bestiary" element={<BestiaryList />} />
+          <Route path="/beast" element={<Bestiary />} />
           <Route path="/" element={<Home />} />
         </Routes>
 

@@ -6,6 +6,7 @@ import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CasinoIcon from '@mui/icons-material/Casino';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import PetsIcon from '@mui/icons-material/Pets';
 
 import "./Home.scss";
 
@@ -41,6 +42,20 @@ export default function Home() {
           <div className="home-label">Initiative</div>
         </Card>
       </div>
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/bestiary')}>
+          <PetsIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Bestiary</div>
+        </Card>
+      </div>
+      {currentUser?.isAdmin && (
+        <div className='home-item'>
+          <Card variant="outlined" className='card-item' onClick={() => navigate('/beast')}>
+            <DescriptionIcon style={{ fontSize: "150px" }} />
+            <div className="home-label">Add Beast</div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
