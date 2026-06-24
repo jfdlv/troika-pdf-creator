@@ -1,0 +1,133 @@
+.bl-container {
+  min-width: 680px;
+  margin: 24px auto;
+  padding: 0 16px 40px;
+}
+
+.bl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.bl-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.bl-search {
+  margin-bottom: 16px !important;
+}
+
+.bl-list {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .bl-list-item-text .MuiListItemText-primary {
+    text-transform: capitalize;
+  }
+}
+
+.bl-empty {
+  padding: 24px;
+  text-align: center;
+  opacity: 0.5;
+}
+
+// Dialog
+.bl-dialog-title {
+  font-size: 22px !important;
+  font-weight: bold !important;
+}
+
+.bl-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bl-stats-block {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 24px;
+  margin-bottom: 4px;
+}
+
+.bl-stat-row {
+  display: flex;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.bl-stat-label {
+  opacity: 0.55;
+  min-width: 70px;
+}
+
+.bl-stat-value {
+  font-weight: 600;
+}
+
+.bl-section-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.55;
+  margin: 12px 0 8px;
+}
+
+.bl-mien-list {
+  margin: 0;
+  padding-left: 20px;
+
+  li {
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+}
+
+.bl-description {
+  line-height: 1.7;
+  font-size: 14px;
+  margin: 4px 0 0;
+  opacity: 0.85;
+}
+
+.bl-divider {
+  margin: 8px 0 !important;
+}
+
+.bl-damage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 8px 0;
+
+  th, td {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 4px 8px;
+    text-align: center;
+  }
+
+  th {
+    opacity: 0.6;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  td:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+}
+
+.bl-special-notes {
+  font-size: 13px;
+  font-style: italic;
+  opacity: 0.7;
+  margin: 6px 0 0;
+}

@@ -1,0 +1,83 @@
+.bestiary-container {
+  margin-top: 24px;
+  padding-bottom: 40px;
+
+  h2 {
+    margin: 0 0 8px;
+  }
+}
+
+.bestiary-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .bestiary-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bestiary-damage-table-builder {
+  margin-top: 16px;
+}
+
+.bestiary-damage-table-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.bestiary-damage-table-label {
+  font-size: 13px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bestiary-damage-cols-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.bestiary-damage-col-label-spacer {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.bestiary-damage-col-delete-spacer {
+  width: 34px;
+  flex-shrink: 0;
+}
+
+.bestiary-damage-col-heading {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.55;
+}
+
+.bestiary-damage-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.bestiary-damage-row-label {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.bestiary-damage-col-value {
+  flex: 1;
+
+  input {
+    text-align: center;
+    padding: 6px 4px;
+  }
+}

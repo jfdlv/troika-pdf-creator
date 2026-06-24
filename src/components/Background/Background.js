@@ -1,322 +1,285 @@
-import React, {useState, useRef} from "react";
-// import {TextField, Container, Grid, ListItemSecondaryAction, IconButton, Button, Input, InputLabel} from '@material-ui/core';
-import cloneDeep from 'lodash/cloneDeep';
-import DeleteIcon from '@material-ui/icons/Delete';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { pdf} from '@react-pdf/renderer';
-import { Page, 
-        Text, 
-        View, 
-        Document, 
-        StyleSheet, 
-        Image } from '@react-pdf/renderer';
-import { TextField, 
-        Container, 
-        Grid, 
-        ListItemSecondaryAction, 
-        IconButton, 
-        Button,
-        Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Grid, TextField, Button, Paper,
+  List, ListItem, ListItemText, IconButton,
+  Alert, CircularProgress, DialogTitle, DialogContent, DialogActions,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { addBackgroundThunk, updateBackgroundThunk } from '../../store/dataSlice';
+import { generateBackgroundPdf } from '../../pdf-templates/BackgroundTemplate';
+import './Background.scss';
 
-import './Background.css';
+const toCamelCase = (str) =>
+  str.trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word, i) =>
+      i === 0
+        ? word.toLowerCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join('');
 
-const styles = StyleSheet.create({
-  document:{
-    width: 900
-  },
-  page: {
-    display: 'flex',
-    flexDirection: 'row',
-    backgroundColor: '#FFFCEE'
-  },
-  section: {
-    width: 400,
-    flexGrow: 1,
-    marginRight: 0,
-  },
-  section2: {
-    width: 400,
-    flexGrow: 1,
-    textAlign: "left",
-    padding: 20,
-    marginLeft: 0
-  },
-  backgroundName:  {
-    fontSize: 20,
-    width: 250,
-    textDecoration: "underline",
-    textTransform: "capitalize",
-    textAlign: "left"
-  },
-  description: {
-    fontSize: 13,
-    margin: 5,
-    padding: 5,
-    border: "1px solid lightgrey",
-    borderRadius: 5,
-    marginTop: 10
-  },
-  subtitle: {
-    fontSize: 15,
-    textDecoration: "underline",
-    margin: 5
-  },
-  possessions: {
-    margin: 5
-  },  
-  possession: {
-    fontSize: 14,
-    marginTop: 5
-  },
-  advancedSkills: {
-    margin: 5
-  },
-  advancedSkill: {
-    fontSize: 14,
-    marginTop: 5
-  },
-  special: {
-    fontSize: 13,
-    margin: 5,
-    padding: 5,
-    marginTop: 10
-  },
-  imageContainer: {
-    width: 250,
-    marginLeft: 50,
-    padding: 20
-  },
-  image: {
-    width: "100%"
-  }
+const formatSkillName = (key) => {
+  const spaced = key.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+};
+
+const emptyMien = ['', '', '', '', '', ''];
+
+const emptyState = () => ({
+  backgroundName: '',
+  description: '',
+  possessions: [],
+  advancedSkills: {},
+  special: '',
+  mien: [...emptyMien],
 });
 
-export default function Background() {
-  
-    const [state, setState] = useState(
-      {
-        name: "",
-        description: "",
-        possessions: [],
-        advancedSkills: [],
-        special: "",
-        imgUrl: ""
-      }
-    );
+export default function Background({ editId, onClose }) {
+  const dispatch = useDispatch();
+  const backgrounds = useSelector((state) => state.data.backgrounds);
+  const editTarget = editId ? backgrounds.find((b) => b.id === editId) : null;
 
-    let handleNameChange = (event)  => {
-        let newState = cloneDeep(state);
-        newState.name = event.target.value;
-        setState(newState);
-    }
-  
-    let handleDescriptionChange = (event)  => {
-      let newState = cloneDeep(state);
-      newState.description = event.target.value;
-      setState(newState);
-    }
+  const [form, setForm] = useState(emptyState());
+  const [skillName, setSkillName] = useState('');
+  const [skillLevel, setSkillLevel] = useState(1);
+  const [possession, setPossession] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null);
 
-    let handleSpecialChange = (event)  => {
-        let newState = cloneDeep(state);
-        newState.special = event.target.value;
-        setState(newState);
-    }
-  
-    let handlePossessionsAdd = () => {
-      let newState = cloneDeep(state);
-      let newItem = possessionRef.current.value;
-      newState.possessions.push(newItem);
-      setState(newState);
-    }
-  
-    let handleAdvancedSkillAdd = () => {
-      let newState = cloneDeep(state);
-      let newItem = ` ${advancedSkillLevelRef.current.value} ${advancedSkillRef.current.value}`;
-      newState.advancedSkills.push(newItem);
-      setState(newState);
-    }
-  
-    let handleOnDeletePossession = (index) => {
-        let newState = cloneDeep(state);
-        newState.possessions.splice(index,1);
-        setState(newState);
-    }
-
-    let handleOnDeleteAdvncdSkill = (index) => {
-        let newState = cloneDeep(state);
-        newState.advancedSkills.splice(index,1);
-        setState(newState);
-    }
-
-    let printPdf = () => {
-      let backgroundTemplate = (<Document style={styles.document}>
-        <Page size="A4" style={styles.page}>
-          <View style={styles.section}   >
-              <View style={styles.imageContainer}   >
-                  <Image styles={styles.image} alt="no image" src={state.imgUrl}/>
-              </View>
-          </View>
-          <View style={styles.section2}>
-              <Text style={styles.backgroundName}>{state.name}</Text>
-            
-              <Text style={styles.description}>
-              {state.description}            
-              </Text>
-            
-              <Text style={styles.subtitle}> 
-              Possessions
-              </Text>
-              
-              <View style={styles.possessions}>
-              {
-                state.possessions && state.possessions.map((possession,index) => {
-                  return <Text key={`${possession}${index}`} style={styles.possession}>
-                  &bull; {possession}
-                  </Text>
-                })
-              }
-              </View>
-              
-
-              <Text style={styles.subtitle}>
-              Advanced Skills
-              </Text>
-              <View style={styles.advancedSkills}>
-              {
-                state.advancedSkills && state.advancedSkills.map((advancedSkill,index) => {
-                  return <Text key={`${advancedSkill}${index}`} style={styles.possession}>
-                  {advancedSkill}
-                  </Text>
-                })
-              }
-              </View>
-              
-              <Text style={styles.subtitle}> 
-              Special
-              </Text>
-              
-              <Text style={styles.special}>
-              {state.special}            
-              </Text>
-          </View>
-        </Page>
-      </Document>)
-
-      let pdfInstance = pdf(<Document></Document>);
-      pdfInstance.updateContainer(backgroundTemplate);
-      pdfInstance.toBlob()
-      .then((blob)=>{
-            var url = URL.createObjectURL(blob);
-            window.open(url,"_blank");
+  useEffect(() => {
+    setSaveStatus(null);
+    if (editTarget) {
+      const mienPadded = [...(editTarget.mien || [])];
+      while (mienPadded.length < 6) mienPadded.push('');
+      setForm({
+        backgroundName: editTarget.backgroundName || '',
+        description: editTarget.description || '',
+        possessions: editTarget.possessions || [],
+        advancedSkills: editTarget.advancedSkills || {},
+        special: editTarget.special || '',
+        mien: mienPadded,
       });
-    } 
+    } else {
+      setForm(emptyState());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
-    const advancedSkillRef = useRef();
-    const advancedSkillLevelRef = useRef();
-    const possessionRef = useRef();
-  
-    return <React.Fragment>
-        <Container className="background-container">
-          {/* <Paper> */}
-              <form>
-                    {/* <InputLabel>Description:</InputLabel> */}
-                    <Grid container>
-                      
-                      <h2>Create Troika Background</h2>
+  const setField = (field, value) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
 
-                      <Grid item md={12} style={{marginTop: "10px"}}>
-                        <Paper>
-                          <TextField fullWidth={true} label="Background Name" type="text" id="name" value={state.name} onChange={handleNameChange} variant="outlined"/>
-                        </Paper>
-                      </Grid>
+  const addPossession = () => {
+    if (!possession.trim()) return;
+    setField('possessions', [...form.possessions, possession.trim()]);
+    setPossession('');
+  };
 
-                      <Grid item md={12} style={{marginTop: "10px"}}>
-                        <Paper>
-                          <TextField fullWidth={true} label="Description" type="text" id="description" multiline rows={4} value={state.description} onChange={handleDescriptionChange} variant="outlined"/>
-                        </Paper>
-                      </Grid>
-                      
-                      <Grid container spacing={1} className="possessions-container">
-                        <Grid item md={11}>
-                          <Paper>
-                            <TextField fullWidth={true} label="Possessions:" type="text" id="possession" variant="outlined" inputRef={possessionRef}/>
-                          </Paper>
-                        </Grid>
-                        <Grid className="button-container" item md={1} style={{textAlign: "center", verticalAlign: "middle"}}> 
-                            <Button variant="contained" onClick={handlePossessionsAdd}>Add</Button>
-                        </Grid>
-                        <Grid item md={12}>
-                          <List aria-label="secondary mailbox folders">
-                            {state.possessions && state.possessions.map((item, index)=>{
-                                return <ListItem key={`${item}${index}`}>
-                                        <ListItemText primary={item} />
-                                        <ListItemSecondaryAction>
-                                          <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeletePossession(index)}}>
-                                            <DeleteIcon />
-                                          </IconButton>
-                                        </ListItemSecondaryAction>
-                                      </ListItem>
-                            })}
-                          </List>
-                        </Grid>
-                      </Grid>
-                      
-                      <Grid container spacing={1} className="advanced-skills-container">
-                          <Grid item md={5}>
-                            <Paper>
-                              <TextField  fullWidth={true} label="Advanced Skill:" type="text" id="advancedSkill" variant="outlined" inputRef={advancedSkillRef}/>
-                            </Paper>
-                          </Grid>
-                          <Grid item md={5}>
-                            <Paper>
-                              <TextField fullWidth={true} label="Level:" type="number" id="advancedSkillLevel" variant="outlined" inputRef={advancedSkillLevelRef}/>
-                            </Paper>
-                          </Grid>
-                          <Grid item md={2} className="button-container"> 
-                            <Button variant="contained" onClick={handleAdvancedSkillAdd}>Add</Button>
-                          </Grid>
-                          <Grid item md={12}>
-                            <List aria-label="secondary mailbox folders">
-                              {state.advancedSkills && state.advancedSkills.map((item, index)=>{
-                                return <ListItem key={`${item}${index}`}>
-                                        <ListItemText primary={item} />
-                                        <ListItemSecondaryAction>
-                                          <IconButton edge="end" aria-label="delete" onClick={()=>{handleOnDeleteAdvncdSkill(index)}}>
-                                            <DeleteIcon/>
-                                          </IconButton>
-                                        </ListItemSecondaryAction>
-                                      </ListItem>
-                                })
-                              }
-                            </List>
-                          </Grid>
-                      </Grid>
+  const removePossession = (index) =>
+    setField('possessions', form.possessions.filter((_, i) => i !== index));
 
-                      <Grid item md={12} className="special-container" style={{marginTop: "10px", marginBottom: "10px"}}>
-                        <Paper>
-                          <TextField fullWidth={true} label="Special" type="text" id="special" value={state.special} onChange={handleSpecialChange} variant="outlined"/>
-                        </Paper>
-                      </Grid>
+  const addSkill = () => {
+    if (!skillName.trim() || Number(skillLevel) < 1) return;
+    const key = toCamelCase(skillName);
+    setField('advancedSkills', { ...form.advancedSkills, [key]: Number(skillLevel) });
+    setSkillName('');
+    setSkillLevel(1);
+  };
 
-                      {/* <Grid item md={12} className="file-input-container">
-                        <InputLabel>Background Image: </InputLabel>
-                        <Input type="file" accept="image/*" onChange={readUrl} id="" />
-                        <img src="" alt="" style={{width:"50px", height: "50px"}} id="image-holder"/>
-                      </Grid> */}
+  const removeSkill = (key) => {
+    const updated = { ...form.advancedSkills };
+    delete updated[key];
+    setField('advancedSkills', updated);
+  };
 
-                      <div className="print-button-container">
-                        <Button onClick={printPdf} variant="contained">Print</Button>
-                        {/* <BlobProvider document={pdfTemplate}>
-                        {({ blob, url }) => {
-                          return <Button href={url} target="_blank" variant="contained">Print</Button>
-                        }}
-                      </BlobProvider> */}
-                      </div>
-                  </Grid>
-              </form>
-          {/* </Paper> */}
-        </Container>
-    </React.Fragment>;
+  const setMienEntry = (index, value) => {
+    const updated = [...form.mien];
+    updated[index] = value;
+    setField('mien', updated);
+  };
+
+  const handleSave = async () => {
+    if (!form.backgroundName.trim()) {
+      setSaveStatus({ type: 'error', message: 'Background name is required.' });
+      return;
+    }
+    setSaving(true);
+    setSaveStatus(null);
+    try {
+      const payload = {
+        ...form,
+        backgroundName: form.backgroundName.trim(),
+        mien: form.mien.filter(Boolean),
+      };
+      if (editId) {
+        await dispatch(updateBackgroundThunk({ id: editId, ...payload })).unwrap();
+      } else {
+        await dispatch(addBackgroundThunk(payload)).unwrap();
+      }
+      onClose();
+    } catch {
+      setSaveStatus({ type: 'error', message: 'Failed to save. Try again.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePrint = () => {
+    generateBackgroundPdf({ ...form, mien: form.mien.filter(Boolean) });
+  };
+
+  return (
+    <>
+      <DialogTitle>{editId ? 'Edit Background' : 'Add Background'}</DialogTitle>
+
+      <DialogContent dividers className="background-dialog-content">
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Background Name</h3>
+              <TextField
+                fullWidth
+                size="small"
+                value={form.backgroundName}
+                onChange={(e) => setField('backgroundName', e.target.value)}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Description</h3>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={4}
+                value={form.description}
+                onChange={(e) => setField('description', e.target.value)}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Special Ability</h3>
+              <TextField
+                fullWidth
+                size="small"
+                multiline
+                rows={3}
+                value={form.special}
+                onChange={(e) => setField('special', e.target.value)}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Possessions</h3>
+              <div className="bg-row">
+                <TextField
+                  label="Item"
+                  size="small"
+                  value={possession}
+                  onChange={(e) => setPossession(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addPossession()}
+                  className="bg-input-grow"
+                />
+                <Button variant="contained" onClick={addPossession}>Add</Button>
+              </div>
+              <List dense>
+                {form.possessions.map((item, i) => (
+                  <ListItem
+                    key={i}
+                    secondaryAction={
+                      <IconButton size="small" onClick={() => removePossession(i)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText primary={item} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Advanced Skills</h3>
+              <div className="bg-row">
+                <TextField
+                  label="Skill name"
+                  size="small"
+                  value={skillName}
+                  onChange={(e) => setSkillName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addSkill()}
+                  className="bg-input-grow"
+                />
+                <TextField
+                  label="Level"
+                  type="number"
+                  size="small"
+                  value={skillLevel}
+                  onChange={(e) => setSkillLevel(e.target.value)}
+                  inputProps={{ min: 1 }}
+                  className="bg-input-short"
+                />
+                <Button variant="contained" onClick={addSkill}>Add</Button>
+              </div>
+              <List dense>
+                {Object.entries(form.advancedSkills).map(([key, value]) => (
+                  <ListItem
+                    key={key}
+                    secondaryAction={
+                      <IconButton size="small" onClick={() => removeSkill(key)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText primary={`${value}  ${formatSkillName(key)}`} />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper className="bg-section">
+              <h3>Mien (d6 table)</h3>
+              <div className="bg-mien-grid">
+                {form.mien.map((entry, i) => (
+                  <TextField
+                    key={i}
+                    label={String(i + 1)}
+                    size="small"
+                    value={entry}
+                    onChange={(e) => setMienEntry(i, e.target.value)}
+                  />
+                ))}
+              </div>
+            </Paper>
+          </Grid>
+
+          {saveStatus && (
+            <Grid item xs={12}>
+              <Alert severity={saveStatus.type}>{saveStatus.message}</Alert>
+            </Grid>
+          )}
+        </Grid>
+      </DialogContent>
+
+      <DialogActions>
+        {saving && <CircularProgress size={24} />}
+        <Button onClick={handlePrint}>Print PDF</Button>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="contained" onClick={handleSave} disabled={saving}>
+          {editId ? 'Update' : 'Save'}
+        </Button>
+      </DialogActions>
+    </>
+  );
 }

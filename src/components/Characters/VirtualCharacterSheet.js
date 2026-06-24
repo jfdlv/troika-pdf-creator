@@ -1,221 +1,210 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from "lodash";
-import {Grid, Paper} from '@mui/material';
-import {Store} from "../../AppState/Store";
+import { Grid, Paper, Button, Box } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from "react-router-dom";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import Alert from '@mui/material/Alert';
 import InventorySorter from '../CharacterGenerator/InventorySorter';
-import isEmpty from 'lodash/isEmpty';
-import {
-  useHistory
-} from "react-router-dom";
-
-// import { Page, Text, View, Document, StyleSheet} from '@react-pdf/renderer';
-
+import { isEmpty } from 'lodash';
+import { updateAdvancedSkillRank, updateWeaponDamage } from '../../store/characterSlice';
+import { updateCharacterThunk } from '../../store/authSlice';
 import "./VirtualCharacterSheet.scss";
 
 export default function VirtualCharacterSheet() {
-    const { state } = React.useContext(Store);
-    const [advancedSkillsObject, setAdvanceSkillsObject] = useState({});
-    const [weaponsArray, setWeaponsArray] = useState([]);
+  const characterInfo = useSelector((state) => state.character.characterInfo);
+  const damageTable = useSelector((state) => state.data.damageTable);
+  const currentUser = useSelector((state) => state.auth.currentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const history = useHistory();
-    
-    useEffect(()=>{
-      if(isEmpty(state.characterInfo)) {
-        history.push("/userCharacters");
-      }
-    }, [])
+  const [weaponsArray, setWeaponsArray] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-    useEffect(()=>{
-      if(!isEmpty(state.characterInfo)) {
-        let advancedSkillsObjectAux = {};
-        let weaponsArrayAux = [];
-        
+  useEffect(() => {
+    if (isEmpty(characterInfo)) {
+      navigate("/userCharacters");
+    }
+  }, []);
 
-
-        for (var advancedSkill in state.characterInfo.background.advancedSkills) {
-            advancedSkillsObjectAux[advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2')] = state.characterInfo.background.advancedSkills[advancedSkill];
-            let formattedSkill = advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
-            if(formattedSkill.includes("Fighting")){
-                let weaponName = formattedSkill.replace("Fighting","");
-                weaponName = weaponName.replace(" ","");
-                weaponsArrayAux.push(weaponName);
-            }
+  useEffect(() => {
+    if (!isEmpty(characterInfo)) {
+      const weaponsArrayAux = [];
+      for (const advancedSkill in characterInfo.background.advancedSkills) {
+        const formattedSkill = advancedSkill.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+        if (formattedSkill.includes("Fighting")) {
+          weaponsArrayAux.push(formattedSkill.replace("Fighting", "").trim());
         }
-        setAdvanceSkillsObject(advancedSkillsObjectAux)
-        setWeaponsArray(weaponsArrayAux);
       }
-    }, [state.characterInfo])
+      setWeaponsArray(weaponsArrayAux);
+    }
+  }, [characterInfo]);
 
-    return !isEmpty(state.characterInfo) && <div className="virtual-character-sheet">
-            <div className="container"  style={!state.characterInfo.background.special ? {width: "100%"}: {}}>
-              <div className="top-info-item"  style={!state.characterInfo.background.special ? {width: "100%", maxWidth: "unset"}: {}}>
+  const handleSkillRankChange = (originalKey, value) => {
+    const rank = parseInt(value, 10);
+    if (!isNaN(rank)) {
+      dispatch(updateAdvancedSkillRank({ key: originalKey, rank }));
+    }
+  };
 
-                {/* <Paper  className="items-container"> */}
-                  <Grid item container spacing={2} className="first-row"  style={!state.characterInfo.background.special ? {width: "100%"}: {}}>
-                    <Grid item className='item' md={6}  style={!state.characterInfo.background.special ? {width: "50%"}: {}}>
-                      <Paper className='item-container'>
-                        <div className='item-label'>Name: </div>
-                        <div className='item-value' style={{textTransform: "capitalize"}}>{state.characterInfo.name}</div>
-                      </Paper>
-                    </Grid>
-                    <Grid item className='item' md={6}  style={!state.characterInfo.background.special ? {width: "50%"}: {}}>
-                      <Paper className='item-container'>
-                        <div className='item-label'>Background: </div>
-                        <div className='item-value' style={{textTransform: "capitalize"}}>
-                          {state.characterInfo.background.backgroundName.toLowerCase()}
-                        </div>
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                {/* </Paper> */}
+  const handleDamageValueChange = (weapon, index, value) => {
+    const current = characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || [];
+    const updated = [...current];
+    updated[index] = value;
+    dispatch(updateWeaponDamage({ weapon, values: updated }));
+  };
 
-                <Grid spacing={4} container item style={{marginTop: "1px"}}>
-                    <Grid item className='item' md={4}>
-                      <Paper className='item-container'>
-                        {/* <Grid md={12}> */}
-                            <div className='item-label'>
-                                Skill:
-                            </div>
-                        {/* </Grid>
-                        <Grid md={12}>  */}
-                            <div className='item-value' style={{fontSize: "25px"}}>
-                                {state.characterInfo.skill}
-                            </div>
-                        {/* </Grid> */}
-                      </Paper>
-                    </Grid>
-                    <Grid item className='item' md={4}>
-                      <Paper className='item-container'>
-                        {/* <Grid md={12}> */}
-                            <div className='item-label'>
-                                Stamina:
-                            </div>
-                        {/* </Grid>
-                        <Grid md={12}>  */}
-                            <div className='item-value'  style={{fontSize: "25px"}}>
-                                {state.characterInfo.stamina}
-                            </div>
-                        {/* </Grid> */}
-                      </Paper>
-                    </Grid>
-                    <Grid item className='item' md={4}>
-                      <Paper className='item-container'>
-                        {/* <Grid md={12}> */}
-                            <div className='item-label'>
-                                Luck:
-                            </div>
-                        {/* </Grid>
-                        <Grid md={12}>  */}
-                            <div className='item-value'  style={{fontSize: "25px"}}>
-                                {state.characterInfo.luck}
-                            </div>
-                        {/* </Grid> */}
-                      </Paper>
-                    </Grid>
-                </Grid>
-              </div>
+  const handleSave = async () => {
+    setSaveError('');
+    setSaving(true);
+    try {
+      await dispatch(updateCharacterThunk({ uid: currentUser.uid, characterInfo })).unwrap();
+    } catch {
+      setSaveError('Error saving character. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-
-              {state.characterInfo.background.special && <div className="top-info-item">
-                <Paper  className="special-container">
-                  <div className='item-label'>Special: </div>
-                  <div className='item-value'>
-                      {state.characterInfo.background.special}
-                  </div>
-                </Paper>
-              </div>}
-            </div>
-
-            {weaponsArray.length > 0 && 
-            <div className='container'>
-              <TableContainer component={Paper} className="item-container">
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center"><div className='item-label'>Weapon</div></TableCell>
-                      <TableCell align="center">1</TableCell>
-                      <TableCell align="center">2</TableCell>
-                      <TableCell align="center">3</TableCell>
-                      <TableCell align="center">4</TableCell>
-                      <TableCell align="center">5</TableCell>
-                      <TableCell align="center">6</TableCell>
-                      <TableCell align="center">7+</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {weaponsArray.map((value, index) => (
-                      <TableRow
-                        key={index}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      >
-                        <TableCell align="center" component="th" scope="row">
-                          {value}
-                        </TableCell>
-                        {state.damageTable[value.toLowerCase()] && state.damageTable[value.toLowerCase()].map((value,index)=>{
-                            return  <TableCell align="center" key={`damageTable${index}`}>{value}</TableCell>
-                        })}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>}
-            
-            <div className="container">
-              <div className="advanced-skills-container">
-                <div className='item-label' style={{textAlign: "center", maxHeight: "10%"}}>
-                    Advanced Skills
+  return !isEmpty(characterInfo) && (
+    <div className="virtual-character-sheet">
+      <div className="container" style={!characterInfo.background.special ? { width: "100%" } : {}}>
+        <div className="top-info-item" style={!characterInfo.background.special ? { width: "100%", maxWidth: "unset" } : {}}>
+          <Grid item container spacing={2} className="first-row" style={!characterInfo.background.special ? { width: "100%" } : {}}>
+            <Grid item className='item' md={6} style={!characterInfo.background.special ? { width: "50%" } : {}}>
+              <Paper className='item-container'>
+                <div className='item-label'>Name: </div>
+                <div className='item-value' style={{ textTransform: "capitalize" }}>{characterInfo.name}</div>
+              </Paper>
+            </Grid>
+            <Grid item className='item' md={6} style={!characterInfo.background.special ? { width: "50%" } : {}}>
+              <Paper className='item-container'>
+                <div className='item-label'>Background: </div>
+                <div className='item-value' style={{ textTransform: "capitalize" }}>
+                  {characterInfo.background.backgroundName.toLowerCase()}
                 </div>
-                <TableContainer component={Paper} style={{height: "90%", width: "100%"}}>
-                  <Table stickyHeader aria-label="simple table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="center"></TableCell>
-                        <TableCell align="center">Rank</TableCell>
-                        <TableCell align="center">Skill</TableCell>
-                        <TableCell align="center">Total</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {_.map(advancedSkillsObject, (value, key)=>{
-                        return <TableRow
-                          key={`advancedSkill${key}`}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell align="center" component="th" scope="row">
-                            <div className="item-label">{key}</div>
-                          </TableCell>
-                          <TableCell align="center" component="th" scope="row">
-                            {value}
-                          </TableCell>
-                          <TableCell align="center" component="th" scope="row">
-                            {state.characterInfo.skill}
-                          </TableCell>
-                          <TableCell align="center" component="th" scope="row">
-                            {value ? value + state.characterInfo.skill : ""}
-                          </TableCell>
-                        </TableRow>
-                        })
-                      }
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </div>
-              <div className="inventory-container">
-                <div className='item-label' style={{textAlign: "center", maxHeight: "10%"}}>
-                  Inventory
-                </div>
-                <Paper style={{height: "90%"}}>
-                  <InventorySorter />
+              </Paper>
+            </Grid>
+          </Grid>
+
+          <Grid spacing={4} container item style={{ marginTop: "1px" }}>
+            {[['Skill', characterInfo.skill], ['Stamina', characterInfo.stamina], ['Luck', characterInfo.luck]].map(([label, value]) => (
+              <Grid item className='item' md={4} key={label}>
+                <Paper className='item-container'>
+                  <div className='item-label'>{label}:</div>
+                  <div className='item-value' style={{ fontSize: "25px" }}>{value}</div>
                 </Paper>
-              </div>
-            </div>
+              </Grid>
+            ))}
+          </Grid>
         </div>
+
+        {characterInfo.background.special && (
+          <div className="top-info-item">
+            <Paper className="special-container">
+              <div className='item-label'>Special: </div>
+              <div className='item-value'>{characterInfo.background.special}</div>
+            </Paper>
+          </div>
+        )}
+      </div>
+
+      {weaponsArray.length > 0 && (
+        <div className='container'>
+          <TableContainer component={Paper}>
+            <Table stickyHeader sx={{ minWidth: 650 }} aria-label="weapons table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center"><div className='item-label'>Weapon</div></TableCell>
+                  {['1', '2', '3', '4', '5', '6', '7+'].map((n) => <TableCell key={n} align="center">{n}</TableCell>)}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {weaponsArray.map((weapon, index) => {
+                  const effectiveValues = characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || [];
+                  return (
+                    <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell align="center" component="th" scope="row">{weapon}</TableCell>
+                      {effectiveValues.map((val, i) => (
+                        <TableCell align="center" key={`damageTable${i}`}>
+                          <input
+                            value={val ?? ''}
+                            onChange={(e) => handleDamageValueChange(weapon, i, e.target.value)}
+                            className="editable-cell"
+                          />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
+
+      <div className="container">
+        <div className="advanced-skills-container">
+          <TableContainer component={Paper} style={{ flex: 1, width: "100%", overflow: 'auto' }}>
+            <Table stickyHeader aria-label="advanced skills table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Advanced Skills</TableCell>
+                  <TableCell align="center">Rank</TableCell>
+                  <TableCell align="center">Skill</TableCell>
+                  <TableCell align="center">Total</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {_.map(characterInfo.background.advancedSkills, (rank, originalKey) => {
+                  const formatted = originalKey.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+                  return (
+                    <TableRow key={`advancedSkill${originalKey}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell align="center" component="th" scope="row">
+                        <div className="item-label">{formatted}</div>
+                      </TableCell>
+                      <TableCell align="center">
+                        <input
+                          type="number"
+                          value={rank ?? ''}
+                          onChange={(e) => handleSkillRankChange(originalKey, e.target.value)}
+                          className="editable-cell"
+                        />
+                      </TableCell>
+                      <TableCell align="center">{characterInfo.skill}</TableCell>
+                      <TableCell align="center">{rank ? rank + characterInfo.skill : ''}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+        <div className="inventory-container">
+          <Paper style={{ flex: 1, overflow: 'auto' }}>
+            <Box sx={{ position: 'sticky', top: 0, zIndex: 1, bgcolor: 'background.default', textAlign: 'center', py: 1, fontWeight: 'bold' }}>
+              Inventory
+            </Box>
+            <InventorySorter />
+          </Paper>
+        </div>
+      </div>
+
+      {characterInfo.id && (
+        <div className="save-bar">
+          {saveError && <Alert severity="error" sx={{ flex: 1 }}>{saveError}</Alert>}
+          <Button variant="contained" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }

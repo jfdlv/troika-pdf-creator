@@ -1,51 +1,44 @@
-import * as React from 'react';
-import { useHistory } from "react-router-dom";
-import {Store} from "../../AppState/Store";
+import React from 'react';
+import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
 import Card from '@mui/material/Card';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
-import DescriptionIcon from '@mui/icons-material/Description';
+import CasinoIcon from '@mui/icons-material/Casino';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import PetsIcon from '@mui/icons-material/Pets';
 
 import "./Home.scss";
 
 export default function Home() {
-  const { state } = React.useContext(Store);
-  const history = useHistory();
-
-  const navigateTo = (newValue) => {
-    switch (newValue) { 
-        case "background": 
-          history.push('/background');
-          return null;
-        case "characterGen": 
-          history.push('/characterGen');
-          return null;
-        default: 
-          return null;
-    }
-  };
+  const currentUser = useSelector((state) => state.auth.currentUser);
+  const navigate = useNavigate();
 
   return (
-    <div className='home-container'>  
+    <div className='home-container'>
       <div className='home-item'>
-          <Card variant="outlined" 
-            className='card-item'
-            onClick={()=>{navigateTo("characterGen")}}>
-              <PersonAddAlt1Icon style={{fontSize: "150px"}}/>
-              <div className="home-label">
-                Create Character
-              </div>
-          </Card> 
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/characterGen')}>
+          <PersonAddAlt1Icon style={{ fontSize: "150px" }} />
+          <div className="home-label">Create Character</div>
+        </Card>
       </div>
-      {state.currentUser && <div className='home-item'>
-          <Card variant="outlined"
-            className='card-item'
-            onClick={()=>{navigateTo("background")}}>
-              <DescriptionIcon style={{fontSize: "150px"}}/>
-              <div className="home-label">
-                Add Background
-              </div>
-          </Card>
-      </div>}
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/backgrounds')}>
+          <MenuBookIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Backgrounds</div>
+        </Card>
+      </div>
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/initiative')}>
+          <CasinoIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Initiative</div>
+        </Card>
+      </div>
+      <div className='home-item'>
+        <Card variant="outlined" className='card-item' onClick={() => navigate('/bestiary')}>
+          <PetsIcon style={{ fontSize: "150px" }} />
+          <div className="home-label">Bestiary</div>
+        </Card>
+      </div>
     </div>
   );
 }
