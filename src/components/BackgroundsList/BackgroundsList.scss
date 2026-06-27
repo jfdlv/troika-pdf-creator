@@ -9,16 +9,24 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 10px;
+  .bgl-add-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    padding: 4px 8px;
+  }
 }
 
-.bgl-title {
+.bgl-search-container {
   font-size: 28px;
   font-weight: bold;
   margin: 0;
-}
-
-.bgl-search {
-  margin-bottom: 16px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
 }
 
 .bgl-list {

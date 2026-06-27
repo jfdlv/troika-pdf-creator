@@ -37,22 +37,22 @@ export default function Bestiary() {
   return (
     <div className="bl-container">
       <div className="bl-header">
-        <h2 className="bl-title">Bestiary</h2>
+        <h2 className="bl-search-container">
+          <TextField
+            fullWidth
+            label="Search beasts"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bl-search"
+          />
+        </h2>
         {currentUser?.isAdmin && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small">
             Add Beast
           </Button>
         )}
       </div>
-
-      <TextField
-        fullWidth
-        label="Search beasts"
-        size="small"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="bl-search"
-      />
 
       <List className="bl-list">
         {filtered.map((beast) => (

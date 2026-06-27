@@ -12,7 +12,10 @@ export default function InventorySorter() {
 
   useEffect(() => {
     if (characterInfo.background?.possessions) {
-      setPossessions(characterInfo.background.possessions);
+      const filtered = characterInfo.background.possessions.filter(
+        (item) => !item.toLowerCase().includes('provisions')
+      );
+      setPossessions(filtered);
     }
   }, [characterInfo.background?.possessions]);
 
