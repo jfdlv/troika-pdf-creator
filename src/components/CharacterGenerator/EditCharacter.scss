@@ -31,7 +31,7 @@ div.edit-character-container {
                 padding: 10px;
             }
         }
-        div.backgroundSpecial-container { 
+        div.backgroundSpecial-container {
             display: flex;
             max-width: 40%;
             flex-grow: 1;
@@ -40,6 +40,37 @@ div.edit-character-container {
                 height: 100%;
                 overflow-y: auto;
                 padding: 10px;
+            }
+        }
+        div.background-mien-container {
+            display: flex;
+            max-width: 30%;
+            flex-grow: 1;
+            flex-direction: column;
+            div.background-mien-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+                table.background-mien-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    th, td {
+                        border: 1px solid rgba(255, 255, 255, 0.15);
+                        padding: 6px 4px;
+                        text-align: center;
+                    }
+                    th {
+                        opacity: 0.6;
+                        font-weight: 600;
+                        background: rgba(255, 255, 255, 0.04);
+                        width: 14.28%;
+                    }
+                    td {
+                        word-wrap: break-word;
+                        font-size: 11px;
+                    }
+                }
             }
         }
         div.notes-container { 
@@ -117,6 +148,82 @@ div.edit-character-container {
     }
 }
 
+.monies-container {
+  display: flex;
+  flex-direction: column;
+  h3 {
+    margin: 10px 0 8px;
+  }
+  .monies-paper {
+    padding: 10px !important;
+  }
+}
+
+.monies-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+
+  .monies-currency-name {
+    min-width: 120px;
+  }
+
+  .monies-input {
+    width: 100px;
+  }
+}
+
+.spells-container {
+  display: flex;
+  flex-direction: column;
+  h3 {
+    margin: 10px 0 8px;
+  }
+  .spells-paper {
+    padding: 0 !important;
+  }
+}
+
+.spell-accordion {
+  margin-bottom: 8px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.spell-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .spell-cost {
+    font-size: 14px;
+  }
+
+  .spell-description {
+    font-size: 14px;
+    line-height: 1.5;
+    p {
+      margin: 4px 0 0;
+    }
+  }
+
+  .spell-damage {
+    font-size: 14px;
+    .spell-damage-table {
+      margin-top: 8px;
+      border-collapse: collapse;
+      font-size: 12px;
+      td {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 4px 8px;
+        text-align: center;
+      }
+    }
+  }
+}
+
 @media (max-width: 800px) { 
     div.background-notes-special-container, div.background-notes-container { 
         display: flex;
@@ -135,7 +242,7 @@ div.edit-character-container {
                 padding: 10px;
             }
         }
-        div.backgroundSpecial-container { 
+        div.backgroundSpecial-container {
             display: flex;
             flex-grow: 1;
             min-width: 100%;
@@ -145,6 +252,38 @@ div.edit-character-container {
                 height: 100%;
                 overflow-y: auto;
                 padding: 10px;
+            }
+        }
+        div.background-mien-container {
+            display: flex;
+            flex-grow: 1;
+            min-width: 100%;
+            max-width: 100%;
+            flex-direction: column;
+            div.background-mien-paper {
+                height: 100%;
+                overflow-y: auto;
+                padding: 10px;
+                table.background-mien-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                    th, td {
+                        border: 1px solid rgba(255, 255, 255, 0.15);
+                        padding: 6px 4px;
+                        text-align: center;
+                    }
+                    th {
+                        opacity: 0.6;
+                        font-weight: 600;
+                        background: rgba(255, 255, 255, 0.04);
+                        width: 14.28%;
+                    }
+                    td {
+                        word-wrap: break-word;
+                        font-size: 11px;
+                    }
+                }
             }
         }
         div.notes-container { 

@@ -9,16 +9,17 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 10px;
 }
 
-.bl-title {
+.bl-search-container {
   font-size: 28px;
   font-weight: bold;
   margin: 0;
-}
-
-.bl-search {
-  margin-bottom: 16px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
 }
 
 .bl-list {

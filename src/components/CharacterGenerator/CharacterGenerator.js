@@ -44,19 +44,21 @@ export default function CharacterGenerator() {
     const skill = throwDice(3) + 3;
     const stamina = throwDice(6) + throwDice(6) + 12;
     const luck = throwDice(6) + 6;
-    const baselinePossessions = ["a knife", "a lantern & flask of oil", "a rucksack", "6 provisions"];
+    const silverPence = throwDice(6) + throwDice(6);
     const randomIndex = throwDice(36) - 1;
     const background = Object.assign({}, backgrounds[randomIndex]);
 
-    background.possessions = [...(background.possessions || []), ...baselinePossessions];
+    background.possessions = [...(background.possessions || []), "a knife", "a lantern & flask of oil", "a rucksack"];
+    background.provisionsCount = background.provisionsCount || 6;
 
     dispatch(setCharacterInfo({
       name: "",
       skill,
       stamina,
       luck,
-      baselinePossessions,
       background,
+      provisionsChecked: new Array(14).fill(false).map((_, i) => i < (background.provisionsCount || 6)),
+      monies: [{ "Silver Pence": silverPence }],
     }));
   };
 
@@ -65,7 +67,7 @@ export default function CharacterGenerator() {
     setShowSpinner(true);
     try {
       await dispatch(addCharacterThunk({ uid: currentUser.uid, characterInfo })).unwrap();
-      navigate("/userCharacters");
+      navigate("/virtualSheet");
     } catch {
       setErrorMessage("Error saving character. Please try again.");
     } finally {

@@ -46,22 +46,22 @@ export default function BackgroundsList() {
   return (
     <div className="bgl-container">
       <div className="bgl-header">
-        <h2 className="bgl-title">Backgrounds</h2>
+        <h2 className="bgl-search-container">
+          <TextField
+            fullWidth
+            label="Search backgrounds"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bgl-search"
+          />
+        </h2>
         {currentUser?.isAdmin && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small">
+          <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small" className="bgl-add-button">
             Add Background
           </Button>
         )}
       </div>
-
-      <TextField
-        fullWidth
-        label="Search backgrounds"
-        size="small"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="bgl-search"
-      />
 
       <List className="bgl-list">
         {filtered.map((bg) => (

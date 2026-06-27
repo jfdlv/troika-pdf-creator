@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import _ from "lodash";
-import { Grid, Paper, Button, Box } from '@mui/material';
+import { Grid, Paper, Button, Box, TextField, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import Table from '@mui/material/Table';
@@ -13,13 +14,14 @@ import TableRow from '@mui/material/TableRow';
 import Alert from '@mui/material/Alert';
 import InventorySorter from '../CharacterGenerator/InventorySorter';
 import { isEmpty } from 'lodash';
-import { updateAdvancedSkillRank, updateWeaponDamage } from '../../store/characterSlice';
+import { updateAdvancedSkillRank, updateWeaponDamage, setCharacterInfo } from '../../store/characterSlice';
 import { updateCharacterThunk } from '../../store/authSlice';
 import "./VirtualCharacterSheet.scss";
 
 export default function VirtualCharacterSheet() {
   const characterInfo = useSelector((state) => state.character.characterInfo);
   const damageTable = useSelector((state) => state.data.damageTable);
+  const spells = useSelector((state) => state.data.spells);
   const currentUser = useSelector((state) => state.auth.currentUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ export default function VirtualCharacterSheet() {
   const [weaponsArray, setWeaponsArray] = useState([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [provisionsChecked, setProvisionsChecked] = useState([]);
 
   useEffect(() => {
     if (isEmpty(characterInfo)) {
@@ -44,6 +47,12 @@ export default function VirtualCharacterSheet() {
         }
       }
       setWeaponsArray(weaponsArrayAux);
+
+      // Initialize checked state from characterInfo — always 14 boxes, first N checked
+      const provisionsCount = characterInfo.background?.provisionsCount || 6;
+      const checkedState = characterInfo.provisionsChecked ||
+        new Array(14).fill(false).map((_, i) => i < provisionsCount);
+      setProvisionsChecked(checkedState);
     }
   }, [characterInfo]);
 
@@ -59,6 +68,51 @@ export default function VirtualCharacterSheet() {
     const updated = [...current];
     updated[index] = value;
     dispatch(updateWeaponDamage({ weapon, values: updated }));
+  };
+
+  const handleProvisionToggle = (index) => {
+    const updated = [...provisionsChecked];
+    updated[index] = !updated[index];
+    setProvisionsChecked(updated);
+    dispatch(setCharacterInfo({ ...characterInfo, provisionsChecked: updated }));
+  };
+
+  const handleMoneyChange = (currencyIndex, newValue) => {
+    const updated = [...(characterInfo.monies || [])];
+    const currencyType = Object.keys(updated[currencyIndex])[0];
+    updated[currencyIndex] = { [currencyType]: parseInt(newValue, 10) || 0 };
+    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
+  };
+
+  const handleCurrencyNameChange = (currencyIndex, newName) => {
+    const updated = [...(characterInfo.monies || [])];
+    const oldCurrencyType = Object.keys(updated[currencyIndex])[0];
+    const amount = updated[currencyIndex][oldCurrencyType];
+    updated[currencyIndex] = { [newName]: amount };
+    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
+  };
+
+  const handleAddCurrency = () => {
+    const updated = [...(characterInfo.monies || [])];
+    updated.push({ "New Currency": 0 });
+    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
+  };
+
+  const handleRemoveCurrency = (currencyIndex) => {
+    const updated = [...(characterInfo.monies || [])];
+    updated.splice(currencyIndex, 1);
+    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
+  };
+
+  const getCharacterSpells = () => {
+    const advancedSkills = characterInfo.background?.advancedSkills || {};
+    const skillNames = Object.keys(advancedSkills);
+    return spells.filter((spell) =>
+      skillNames.some((skillName) =>
+        skillName.toLowerCase().includes(spell.name.toLowerCase()) ||
+        spell.name.toLowerCase().includes(skillName.toLowerCase())
+      )
+    );
   };
 
   const handleSave = async () => {
@@ -111,6 +165,30 @@ export default function VirtualCharacterSheet() {
             <Paper className="special-container">
               <div className='item-label'>Special: </div>
               <div className='item-value'>{characterInfo.background.special}</div>
+            </Paper>
+          </div>
+        )}
+
+        {characterInfo.background.mien && characterInfo.background.mien.length > 0 && (
+          <div className="top-info-item">
+            <Paper className="mien-container">
+              <div className='item-label'>Mien (d6):</div>
+              <table className="mien-table">
+                <thead>
+                  <tr>
+                    {characterInfo.background.mien.map((_, i) => (
+                      <th key={i}>{i + 1}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {characterInfo.background.mien.map((entry, i) => (
+                      <td key={i}>{entry}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
             </Paper>
           </div>
         )}
@@ -196,6 +274,117 @@ export default function VirtualCharacterSheet() {
           </Paper>
         </div>
       </div>
+      
+      <div className="provisions-monies-container">
+      
+
+        {provisionsChecked.length > 0 && (
+          <div className="provisions-container">
+            <Paper className="provisions-paper">
+              <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
+                Provisions
+              </Box>
+              <div className="provisions-grid">
+                {new Array(14).fill(false).map((_, i) => (
+                  <label key={i} className="provision-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={provisionsChecked[i] || false}
+                      onChange={() => handleProvisionToggle(i)}
+                    />
+                  </label>
+                ))}
+              </div>
+            </Paper>
+          </div>
+        )}
+
+        {characterInfo.monies && characterInfo.monies.length > 0 && (
+          <div className="monies-container">
+            <Paper className="monies-paper">
+              <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
+                Monies
+              </Box>
+              {characterInfo.monies.map((currencyObj, index) => {
+                const currencyType = Object.keys(currencyObj)[0];
+                const amount = currencyObj[currencyType];
+                return (
+                  <div key={index} className="monies-row">
+                    <TextField
+                      size="small"
+                      value={currencyType}
+                      onChange={(e) => handleCurrencyNameChange(index, e.target.value)}
+                      className="monies-currency-name"
+                    />
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => handleMoneyChange(index, e.target.value)}
+                      className="monies-input"
+                    />
+                    {characterInfo.monies.length > 1 && (
+                      <Button size="small" color="error" onClick={() => handleRemoveCurrency(index)}>
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+              <Button size="small" variant="outlined" onClick={handleAddCurrency} style={{ marginTop: "8px" }}>
+                Add Currency
+              </Button>
+            </Paper>
+          </div>
+        )}
+
+      </div>
+
+      {getCharacterSpells().length > 0 && (
+        <div className="character-spells-container">
+          <Paper className="spells-paper">
+            <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
+              Spells
+            </Box>
+            {getCharacterSpells().map((spell) => (
+              <Accordion key={spell.id} className="spell-accordion">
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>{spell.name}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <div className="spell-details">
+                    {spell.cost !== null && (
+                      <div className="spell-cost">
+                        <strong>Cost:</strong> {spell.cost}
+                        {spell.costNote && ` (${spell.costNote})`}
+                      </div>
+                    )}
+                    {spell.description && (
+                      <div className="spell-description">
+                        <strong>Description:</strong>
+                        <p>{spell.description}</p>
+                      </div>
+                    )}
+                    {spell.damage && (
+                      <div className="spell-damage">
+                        <strong>Damage by Roll:</strong>
+                        <table className="spell-damage-table">
+                          <tbody>
+                            <tr>
+                              {['1', '2', '3', '4', '5', '6', '7+'].map((roll) => (
+                                <td key={roll}>{spell.damage[roll] || '—'}</td>
+                              ))}
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Paper>
+        </div>
+      )}
 
       {characterInfo.id && (
         <div className="save-bar">

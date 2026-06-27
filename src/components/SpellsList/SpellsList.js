@@ -35,22 +35,22 @@ export default function SpellsList() {
   return (
     <div className="spells-container">
       <div className="spells-header">
-        <h2 className="spells-title">Spells</h2>
+        <h2 className="spells-search-container">
+          <TextField
+            fullWidth
+            label="Search spells"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="spells-search"
+          />
+        </h2>
         {currentUser?.isAdmin && (
           <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd} size="small">
             Add Spell
           </Button>
         )}
       </div>
-
-      <TextField
-        fullWidth
-        label="Search spells"
-        size="small"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="spells-search"
-      />
 
       <List className="spells-list">
         {filtered.map((spell) => (
