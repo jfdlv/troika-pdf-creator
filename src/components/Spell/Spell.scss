@@ -1,0 +1,41 @@
+.spell-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spell-section {
+  padding: 12px !important;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+  }
+}
+
+.spell-cost-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+
+.spell-damage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.spell-damage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
