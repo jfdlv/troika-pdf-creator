@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import _ from "lodash";
 import { Grid, Paper, Button, Box, TextField, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -14,8 +15,9 @@ import TableRow from '@mui/material/TableRow';
 import Alert from '@mui/material/Alert';
 import InventorySorter from '../CharacterGenerator/InventorySorter';
 import { isEmpty } from 'lodash';
-import { updateAdvancedSkillRank, updateWeaponDamage, setCharacterInfo } from '../../store/characterSlice';
+import { setCharacterInfo } from '../../store/characterSlice';
 import { updateCharacterThunk } from '../../store/authSlice';
+import { generateCharacterSheetPdf } from '../../pdf-templates/CharacterSheetTemplate';
 import "./VirtualCharacterSheet.scss";
 
 export default function VirtualCharacterSheet() {
@@ -29,7 +31,10 @@ export default function VirtualCharacterSheet() {
   const [weaponsArray, setWeaponsArray] = useState([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [provisionsChecked, setProvisionsChecked] = useState([]);
+
+  const { register, control, handleSubmit, reset, watch } = useForm();
+  const { fields: moneyFields, append: appendMoney, remove: removeMoney } = useFieldArray({ control, name: 'monies' });
+  const watchedSkillRanks = watch('skillRanks') || {};
 
   useEffect(() => {
     if (isEmpty(characterInfo)) {
@@ -48,61 +53,51 @@ export default function VirtualCharacterSheet() {
       }
       setWeaponsArray(weaponsArrayAux);
 
-      // Initialize checked state from characterInfo — always 14 boxes, first N checked
       const provisionsCount = characterInfo.background?.provisionsCount || 6;
-      const checkedState = characterInfo.provisionsChecked ||
+      const provisionsChecked = characterInfo.provisionsChecked ||
         new Array(14).fill(false).map((_, i) => i < provisionsCount);
-      setProvisionsChecked(checkedState);
+
+      const damageValues = {};
+      for (const weapon of weaponsArrayAux) {
+        damageValues[weapon] = characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || [];
+      }
+
+      reset({
+        skillRanks: { ...characterInfo.background?.advancedSkills },
+        damageValues,
+        provisionsChecked,
+        monies: (characterInfo.monies || []).map(m => {
+          const currencyType = Object.keys(m)[0];
+          return { currencyType, amount: m[currencyType] };
+        }),
+      });
     }
   }, [characterInfo]);
 
-  const handleSkillRankChange = (originalKey, value) => {
-    const rank = parseInt(value, 10);
-    if (!isNaN(rank)) {
-      dispatch(updateAdvancedSkillRank({ key: originalKey, rank }));
+  const onSave = handleSubmit(async (data) => {
+    setSaveError('');
+    setSaving(true);
+    const updatedCharacterInfo = {
+      ...characterInfo,
+      background: {
+        ...characterInfo.background,
+        advancedSkills: Object.fromEntries(
+          Object.entries(data.skillRanks || {}).map(([k, v]) => [k, parseInt(v, 10) || 0])
+        ),
+      },
+      customDamageValues: data.damageValues || {},
+      provisionsChecked: data.provisionsChecked || [],
+      monies: (data.monies || []).map(m => ({ [m.currencyType]: parseInt(m.amount, 10) || 0 })),
+    };
+    dispatch(setCharacterInfo(updatedCharacterInfo));
+    try {
+      await dispatch(updateCharacterThunk({ uid: currentUser.uid, characterInfo: updatedCharacterInfo })).unwrap();
+    } catch {
+      setSaveError('Error saving character. Please try again.');
+    } finally {
+      setSaving(false);
     }
-  };
-
-  const handleDamageValueChange = (weapon, index, value) => {
-    const current = characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || [];
-    const updated = [...current];
-    updated[index] = value;
-    dispatch(updateWeaponDamage({ weapon, values: updated }));
-  };
-
-  const handleProvisionToggle = (index) => {
-    const updated = [...provisionsChecked];
-    updated[index] = !updated[index];
-    setProvisionsChecked(updated);
-    dispatch(setCharacterInfo({ ...characterInfo, provisionsChecked: updated }));
-  };
-
-  const handleMoneyChange = (currencyIndex, newValue) => {
-    const updated = [...(characterInfo.monies || [])];
-    const currencyType = Object.keys(updated[currencyIndex])[0];
-    updated[currencyIndex] = { [currencyType]: parseInt(newValue, 10) || 0 };
-    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
-  };
-
-  const handleCurrencyNameChange = (currencyIndex, newName) => {
-    const updated = [...(characterInfo.monies || [])];
-    const oldCurrencyType = Object.keys(updated[currencyIndex])[0];
-    const amount = updated[currencyIndex][oldCurrencyType];
-    updated[currencyIndex] = { [newName]: amount };
-    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
-  };
-
-  const handleAddCurrency = () => {
-    const updated = [...(characterInfo.monies || [])];
-    updated.push({ "New Currency": 0 });
-    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
-  };
-
-  const handleRemoveCurrency = (currencyIndex) => {
-    const updated = [...(characterInfo.monies || [])];
-    updated.splice(currencyIndex, 1);
-    dispatch(setCharacterInfo({ ...characterInfo, monies: updated }));
-  };
+  });
 
   const getCharacterSpells = () => {
     const advancedSkills = characterInfo.background?.advancedSkills || {};
@@ -113,18 +108,6 @@ export default function VirtualCharacterSheet() {
         spell.name.toLowerCase().includes(skillName.toLowerCase())
       )
     );
-  };
-
-  const handleSave = async () => {
-    setSaveError('');
-    setSaving(true);
-    try {
-      await dispatch(updateCharacterThunk({ uid: currentUser.uid, characterInfo })).unwrap();
-    } catch {
-      setSaveError('Error saving character. Please try again.');
-    } finally {
-      setSaving(false);
-    }
   };
 
   return !isEmpty(characterInfo) && (
@@ -206,15 +189,14 @@ export default function VirtualCharacterSheet() {
               </TableHead>
               <TableBody>
                 {weaponsArray.map((weapon, index) => {
-                  const effectiveValues = characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || [];
+                  const cellCount = (characterInfo.customDamageValues?.[weapon] || damageTable[weapon.toLowerCase()] || []).length;
                   return (
                     <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell align="center" component="th" scope="row">{weapon}</TableCell>
-                      {effectiveValues.map((val, i) => (
+                      {Array.from({ length: cellCount }, (_, i) => (
                         <TableCell align="center" key={`damageTable${i}`}>
                           <input
-                            value={val ?? ''}
-                            onChange={(e) => handleDamageValueChange(weapon, i, e.target.value)}
+                            {...register(`damageValues.${weapon}.${i}`)}
                             className="editable-cell"
                           />
                         </TableCell>
@@ -243,6 +225,7 @@ export default function VirtualCharacterSheet() {
               <TableBody>
                 {_.map(characterInfo.background.advancedSkills, (rank, originalKey) => {
                   const formatted = originalKey.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+                  const currentRank = parseInt(watchedSkillRanks[originalKey], 10) || 0;
                   return (
                     <TableRow key={`advancedSkill${originalKey}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell align="center" component="th" scope="row">
@@ -251,13 +234,12 @@ export default function VirtualCharacterSheet() {
                       <TableCell align="center">
                         <input
                           type="number"
-                          value={rank ?? ''}
-                          onChange={(e) => handleSkillRankChange(originalKey, e.target.value)}
+                          {...register(`skillRanks.${originalKey}`, { valueAsNumber: true })}
                           className="editable-cell"
                         />
                       </TableCell>
                       <TableCell align="center">{characterInfo.skill}</TableCell>
-                      <TableCell align="center">{rank ? rank + characterInfo.skill : ''}</TableCell>
+                      <TableCell align="center">{currentRank ? currentRank + characterInfo.skill : ''}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -274,30 +256,25 @@ export default function VirtualCharacterSheet() {
           </Paper>
         </div>
       </div>
-      
-      <div className="provisions-monies-container">
-      
 
-        {provisionsChecked.length > 0 && (
-          <div className="provisions-container">
-            <Paper className="provisions-paper">
-              <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
-                Provisions
-              </Box>
-              <div className="provisions-grid">
-                {new Array(14).fill(false).map((_, i) => (
-                  <label key={i} className="provision-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={provisionsChecked[i] || false}
-                      onChange={() => handleProvisionToggle(i)}
-                    />
-                  </label>
-                ))}
-              </div>
-            </Paper>
-          </div>
-        )}
+      <div className="provisions-monies-container">
+        <div className="provisions-container">
+          <Paper className="provisions-paper">
+            <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
+              Provisions
+            </Box>
+            <div className="provisions-grid">
+              {new Array(14).fill(false).map((_, i) => (
+                <label key={i} className="provision-checkbox">
+                  <input
+                    type="checkbox"
+                    {...register(`provisionsChecked.${i}`)}
+                  />
+                </label>
+              ))}
+            </div>
+          </Paper>
+        </div>
 
         {characterInfo.monies && characterInfo.monies.length > 0 && (
           <div className="monies-container">
@@ -305,38 +282,38 @@ export default function VirtualCharacterSheet() {
               <Box sx={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px' }}>
                 Monies
               </Box>
-              {characterInfo.monies.map((currencyObj, index) => {
-                const currencyType = Object.keys(currencyObj)[0];
-                const amount = currencyObj[currencyType];
-                return (
-                  <div key={index} className="monies-row">
-                    <TextField
-                      size="small"
-                      value={currencyType}
-                      onChange={(e) => handleCurrencyNameChange(index, e.target.value)}
-                      className="monies-currency-name"
-                    />
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => handleMoneyChange(index, e.target.value)}
-                      className="monies-input"
-                    />
-                    {characterInfo.monies.length > 1 && (
-                      <Button size="small" color="error" onClick={() => handleRemoveCurrency(index)}>
-                        Remove
-                      </Button>
+              {moneyFields.map((field, index) => (
+                <div key={field.id} className="monies-row">
+                  <Controller
+                    name={`monies.${index}.currencyType`}
+                    control={control}
+                    render={({ field: { ref, ...f } }) => (
+                      <TextField
+                        {...f}
+                        inputRef={ref}
+                        size="small"
+                        className="monies-currency-name"
+                      />
                     )}
-                  </div>
-                );
-              })}
-              <Button size="small" variant="outlined" onClick={handleAddCurrency} style={{ marginTop: "8px" }}>
+                  />
+                  <input
+                    type="number"
+                    {...register(`monies.${index}.amount`, { valueAsNumber: true })}
+                    className="monies-input"
+                  />
+                  {moneyFields.length > 1 && (
+                    <Button size="small" color="error" onClick={() => removeMoney(index)}>
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button size="small" variant="outlined" onClick={() => appendMoney({ currencyType: 'New Currency', amount: 0 })} style={{ marginTop: "8px" }}>
                 Add Currency
               </Button>
             </Paper>
           </div>
         )}
-
       </div>
 
       {getCharacterSpells().length > 0 && (
@@ -386,14 +363,17 @@ export default function VirtualCharacterSheet() {
         </div>
       )}
 
-      {characterInfo.id && (
-        <div className="save-bar">
-          {saveError && <Alert severity="error" sx={{ flex: 1 }}>{saveError}</Alert>}
-          <Button variant="contained" onClick={handleSave} disabled={saving}>
+      <div className="save-bar">
+        {saveError && <Alert severity="error" sx={{ flex: 1 }}>{saveError}</Alert>}
+        <Button variant="outlined" onClick={() => generateCharacterSheetPdf(characterInfo, damageTable)}>
+          Print PDF
+        </Button>
+        {characterInfo.id && (
+          <Button variant="contained" onClick={onSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
