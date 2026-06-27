@@ -74,9 +74,42 @@ export const getDamageTableThunk = createAsyncThunk('data/getDamageTable', async
   return snapshot.data();
 });
 
+export const getSpellsThunk = createAsyncThunk('data/getSpells', async () => {
+  const spells = [];
+  const querySnapshot = await getDocs(collection(database, 'spells'));
+  querySnapshot.forEach((snapshot) => {
+    spells.push({ id: snapshot.id, ...snapshot.data() });
+  });
+  return spells;
+});
+
+export const addSpellThunk = createAsyncThunk(
+  'data/addSpell',
+  async (spellData, { dispatch, rejectWithValue }) => {
+    try {
+      await addDoc(collection(database, 'spells'), spellData);
+      await dispatch(getSpellsThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateSpellThunk = createAsyncThunk(
+  'data/updateSpell',
+  async ({ id, ...spellData }, { dispatch, rejectWithValue }) => {
+    try {
+      await setDoc(doc(database, 'spells', id), spellData);
+      await dispatch(getSpellsThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const dataSlice = createSlice({
   name: 'data',
-  initialState: { backgrounds: [], bestiary: [], damageTable: {} },
+  initialState: { backgrounds: [], bestiary: [], spells: [], damageTable: {} },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -85,6 +118,9 @@ const dataSlice = createSlice({
       })
       .addCase(getBestiaryThunk.fulfilled, (state, action) => {
         state.bestiary = action.payload;
+      })
+      .addCase(getSpellsThunk.fulfilled, (state, action) => {
+        state.spells = action.payload;
       })
       .addCase(getDamageTableThunk.fulfilled, (state, action) => {
         state.damageTable = action.payload;
