@@ -32,7 +32,7 @@ export default function VirtualCharacterSheet() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  const { register, control, handleSubmit, reset, watch } = useForm();
+  const { register, control, handleSubmit, reset, watch, setValue } = useForm();
   const { fields: moneyFields, append: appendMoney, remove: removeMoney } = useFieldArray({ control, name: 'monies' });
   const watchedSkillRanks = watch('skillRanks') || {};
 
@@ -66,6 +66,7 @@ export default function VirtualCharacterSheet() {
         skillRanks: { ...characterInfo.background?.advancedSkills },
         damageValues,
         provisionsChecked,
+        currentStamina: characterInfo.currentStamina ?? characterInfo.stamina,
         monies: (characterInfo.monies || []).map(m => {
           const currencyType = Object.keys(m)[0];
           return { currencyType, amount: m[currencyType] };
@@ -87,6 +88,7 @@ export default function VirtualCharacterSheet() {
       },
       customDamageValues: data.damageValues || {},
       provisionsChecked: data.provisionsChecked || [],
+      currentStamina: parseInt(data.currentStamina, 10) || 0,
       monies: (data.monies || []).map(m => ({ [m.currencyType]: parseInt(m.amount, 10) || 0 })),
     };
     dispatch(setCharacterInfo(updatedCharacterInfo));
@@ -102,11 +104,14 @@ export default function VirtualCharacterSheet() {
   const getCharacterSpells = () => {
     const advancedSkills = characterInfo.background?.advancedSkills || {};
     const skillNames = Object.keys(advancedSkills);
+
     return spells.filter((spell) =>
-      skillNames.some((skillName) =>
-        skillName.toLowerCase().includes(spell.name.toLowerCase()) ||
-        spell.name.toLowerCase().includes(skillName.toLowerCase())
-      )
+      skillNames.some((skillName) => {
+        const withoutSpellPrefix = skillName.replace(/^spell/i, '');
+        const separatedCamelCase = withoutSpellPrefix.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+        const spellNameLower = spell.name.toLowerCase();
+        return separatedCamelCase === spellNameLower;
+      })
     );
   };
 
@@ -132,7 +137,7 @@ export default function VirtualCharacterSheet() {
           </Grid>
 
           <Grid spacing={4} container item style={{ marginTop: "1px" }}>
-            {[['Skill', characterInfo.skill], ['Stamina', characterInfo.stamina], ['Luck', characterInfo.luck]].map(([label, value]) => (
+            {[['Skill', characterInfo.skill], ['Luck', characterInfo.luck]].map(([label, value]) => (
               <Grid item className='item' md={4} key={label}>
                 <Paper className='item-container'>
                   <div className='item-label'>{label}:</div>
@@ -140,6 +145,30 @@ export default function VirtualCharacterSheet() {
                 </Paper>
               </Grid>
             ))}
+            <Grid item className='item' md={4} key="stamina">
+              <Paper className='item-container' style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px' }}>
+                <div className='item-label'>Stamina:</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                  <div style={{ fontSize: "25px", fontWeight: 'bold' }}>
+                    {watch('currentStamina') || characterInfo.stamina} / {characterInfo.stamina}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Button size="small" variant="contained" onClick={() => {
+                      const current = watch('currentStamina') || 0;
+                      if (current > 0) {
+                        setValue('currentStamina', current - 1);
+                      }
+                    }} sx={{ minWidth: '32px', padding: '4px' }}>−</Button>
+                    <Button size="small" variant="contained" onClick={() => {
+                      const current = watch('currentStamina') || 0;
+                      if (current < characterInfo.stamina) {
+                        setValue('currentStamina', current + 1);
+                      }
+                    }} sx={{ minWidth: '32px', padding: '4px' }}>+</Button>
+                  </div>
+                </div>
+              </Paper>
+            </Grid>
           </Grid>
         </div>
 

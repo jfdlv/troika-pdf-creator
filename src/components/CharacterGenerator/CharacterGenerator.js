@@ -24,6 +24,7 @@ export default function CharacterGenerator() {
   const navigate = useNavigate();
   const backgrounds = useSelector((state) => state.data.backgrounds);
   const damageTable = useSelector((state) => state.data.damageTable);
+  const spells = useSelector((state) => state.data.spells);
   const characterInfo = useSelector((state) => state.character.characterInfo);
   const currentUser = useSelector((state) => state.auth.currentUser);
 
@@ -51,6 +52,21 @@ export default function CharacterGenerator() {
     background.possessions = [...(background.possessions || []), "a knife", "a lantern & flask of oil", "a rucksack"];
     background.provisionsCount = background.provisionsCount || 6;
 
+    // Replace random spells with actual spells from dataslice
+    if (spells && spells.length > 0) {
+      const advancedSkills = { ...background.advancedSkills };
+      const randomSpellEntries = Object.entries(advancedSkills).filter(([key]) => /random/i.test(key));
+
+      randomSpellEntries.forEach(([key, rank]) => {
+        const randomSpell = spells[throwDice(spells.length) - 1];
+        const newSkillName = 'spell' + randomSpell.name.replace(/\s+/g, '');
+        delete advancedSkills[key];
+        advancedSkills[newSkillName] = rank;
+      });
+
+      background.advancedSkills = advancedSkills;
+    }
+
     dispatch(setCharacterInfo({
       name: "",
       skill,
@@ -59,6 +75,7 @@ export default function CharacterGenerator() {
       background,
       provisionsChecked: new Array(14).fill(false).map((_, i) => i < (background.provisionsCount || 6)),
       monies: [{ "Silver Pence": silverPence }],
+      currentStamina: stamina,
     }));
   };
 
