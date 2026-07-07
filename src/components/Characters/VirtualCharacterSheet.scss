@@ -142,7 +142,8 @@ div.provisions-monies-container {
 .provisions-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 12px;
+  gap: 16px;
+  place-items: center;
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(7, 1fr);
@@ -150,25 +151,17 @@ div.provisions-monies-container {
 
   @media (max-width: 768px) {
     grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
   }
 
   @media (max-width: 480px) {
     grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
   }
 }
 
 .provision-checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    accent-color: #1976d2;
-  }
+  display: none;
 }
 
 .monies-container {
@@ -188,7 +181,7 @@ div.provisions-monies-container {
 
   .monies-input {
     width: 80px;
-    padding: 4px 8px;
+    padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: transparent;
     color: inherit;
