@@ -1,6 +1,6 @@
 # Troika PDF Creator — Claude Instructions
 
-A React 19 + Vite 5 app for generating Troika! tabletop RPG character sheets and backgrounds. Deployed on GitHub Pages.
+A React 19 + Vite 7 app for generating Troika! tabletop RPG character sheets and backgrounds. Deployed on GitHub Pages.
 
 ## Commands
 
@@ -13,13 +13,13 @@ npm run preview # Preview production build locally
 ## Tech Stack
 
 - **React 19** — functional components only, no class components
-- **Vite 5** — bundler. JSX lives in `.js` files (not `.jsx`); handled by `esbuild.loader='jsx'` in `vite.config.js`
+- **Vite 7** — bundler. JSX lives in `.js` files (not `.jsx`); handled by `esbuild.loader='jsx'` in `vite.config.js`. `@vitejs/plugin-react` is pinned to v5 (v6 requires Vite 8)
 - **Redux Toolkit** — all global state. No Context API
 - **React Router v6** — `HashRouter` (required for GitHub Pages). Use `useNavigate`, `Routes`, `Route`. No `Switch`, no `useHistory`
 - **@mui/material v5** — only MUI v5. Never import from `@material-ui/core`
-- **jsPDF + jspdf-autotable** — PDF generation. Templates are plain functions in `src/pdf-templates/`
+- **jsPDF 4 + jspdf-autotable 5** — PDF generation. Templates are plain functions in `src/pdf-templates/` using the functional `autoTable(doc, ...)` API
 - **@hello-pangea/dnd** — drag and drop. No `RootRef` (MUI v4 only)
-- **Firebase 9** — Auth + Firestore. Modular API only (`import { getAuth } from 'firebase/auth'`)
+- **Firebase 12** — Auth + Firestore. Modular API only (`import { getAuth } from 'firebase/auth'`)
 - **SCSS** — styling. No CSS-in-JS (no `sx` prop for layout, no `styled()` for new components)
 
 ## Code Style
