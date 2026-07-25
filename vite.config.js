@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/troika-pdf-creator/',
+  base: '/troika-toolkit/',
   plugins: [react()],
   esbuild: {
     loader: 'jsx',
