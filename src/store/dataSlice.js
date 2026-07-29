@@ -107,9 +107,42 @@ export const updateSpellThunk = createAsyncThunk(
   }
 );
 
+export const getAdvancedSkillsThunk = createAsyncThunk('data/getAdvancedSkills', async () => {
+  const advancedSkills = [];
+  const querySnapshot = await getDocs(collection(database, 'advancedSkills'));
+  querySnapshot.forEach((snapshot) => {
+    advancedSkills.push({ id: snapshot.id, ...snapshot.data() });
+  });
+  return advancedSkills;
+});
+
+export const addAdvancedSkillThunk = createAsyncThunk(
+  'data/addAdvancedSkill',
+  async (advancedSkillData, { dispatch, rejectWithValue }) => {
+    try {
+      await addDoc(collection(database, 'advancedSkills'), advancedSkillData);
+      await dispatch(getAdvancedSkillsThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateAdvancedSkillThunk = createAsyncThunk(
+  'data/updateAdvancedSkill',
+  async ({ id, ...advancedSkillData }, { dispatch, rejectWithValue }) => {
+    try {
+      await setDoc(doc(database, 'advancedSkills', id), advancedSkillData);
+      await dispatch(getAdvancedSkillsThunk());
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const dataSlice = createSlice({
   name: 'data',
-  initialState: { backgrounds: [], bestiary: [], spells: [], damageTable: {} },
+  initialState: { backgrounds: [], bestiary: [], spells: [], advancedSkills: [], damageTable: {} },
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -121,6 +154,9 @@ const dataSlice = createSlice({
       })
       .addCase(getSpellsThunk.fulfilled, (state, action) => {
         state.spells = action.payload;
+      })
+      .addCase(getAdvancedSkillsThunk.fulfilled, (state, action) => {
+        state.advancedSkills = action.payload;
       })
       .addCase(getDamageTableThunk.fulfilled, (state, action) => {
         state.damageTable = action.payload;

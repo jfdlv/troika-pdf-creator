@@ -1,0 +1,52 @@
+.advanced-skills-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.advanced-skills-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.advanced-skills-search-container {
+  margin: 0;
+  flex: 1;
+}
+
+.advanced-skills-search {
+  width: 100%;
+}
+
+.advanced-skills-list {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 0;
+}
+
+.advanced-skills-list-item-text .MuiListItemText-primary {
+  font-weight: 600;
+}
+
+.advanced-skills-empty {
+  padding: 16px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.advanced-skills-dialog-title {
+  font-weight: 700;
+}
+
+.advanced-skills-dialog-content {
+  padding-top: 16px;
+}
+
+.advanced-skills-description {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin: 0;
+}
