@@ -12,6 +12,7 @@ export default function EditCharacter() {
   const dispatch = useDispatch();
   const characterInfo = useSelector((state) => state.character.characterInfo);
   const spells = useSelector((state) => state.data.spells);
+  const advancedSkills = useSelector((state) => state.data.advancedSkills);
 
   const updateCharacterName = (event) => {
     dispatch(setCharacterInfo({ ...characterInfo, name: event.target.value }));
@@ -56,6 +57,30 @@ export default function EditCharacter() {
         skillName.toLowerCase().includes(spell.name.toLowerCase()) ||
         spell.name.toLowerCase().includes(skillName.toLowerCase())
       )
+    );
+  };
+
+  const getCharacterAdvancedSkills = () => {
+    const advancedSkillsFromBackground = characterInfo.background?.advancedSkills || {};
+    const skillNames = Object.keys(advancedSkillsFromBackground);
+
+    return advancedSkills.filter((ability) =>
+      skillNames.some((skillName) => {
+        const normalizedSkillName = skillName
+          .replace(/^spell/i, '')
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]/g, ' ')
+          .trim()
+          .toLowerCase();
+        const normalizedAbilityName = ability.name
+          .replace(/[_-]/g, ' ')
+          .trim()
+          .toLowerCase();
+
+        return normalizedSkillName === normalizedAbilityName ||
+          normalizedAbilityName.includes(normalizedSkillName) ||
+          normalizedSkillName.includes(normalizedAbilityName);
+      })
     );
   };
 
@@ -252,6 +277,31 @@ export default function EditCharacter() {
                               </tr>
                             </tbody>
                           </table>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Paper>
+          </div>
+        )}
+
+        {getCharacterAdvancedSkills().length > 0 && (
+          <div className="spells-container">
+            <h3>Advanced Skill Details:</h3>
+            <Paper className="spells-paper">
+              {getCharacterAdvancedSkills().map((ability) => (
+                <Accordion key={ability.id} className="spell-accordion">
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography>{ability.name}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="spell-details">
+                      {ability.description && (
+                        <div className="spell-description">
+                          <strong>Description:</strong>
+                          <p>{ability.description}</p>
                         </div>
                       )}
                     </div>

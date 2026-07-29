@@ -9,6 +9,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import BackpackIcon from '@mui/icons-material/Backpack';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import SetMealIcon from '@mui/icons-material/SetMeal';
 import CheckIcon from '@mui/icons-material/Check';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -32,6 +33,7 @@ export default function VirtualCharacterSheet() {
   const characterInfo = useSelector((state) => state.character.characterInfo);
   const damageTable = useSelector((state) => state.data.damageTable);
   const spells = useSelector((state) => state.data.spells);
+  const advancedSkills = useSelector((state) => state.data.advancedSkills);
   const currentUser = useSelector((state) => state.auth.currentUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -143,6 +145,30 @@ export default function VirtualCharacterSheet() {
         const separatedCamelCase = withoutSpellPrefix.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
         const spellNameLower = spell.name.toLowerCase();
         return separatedCamelCase === spellNameLower;
+      })
+    );
+  };
+
+  const getCharacterAdvancedSkills = () => {
+    const advancedSkillsFromBackground = characterInfo.background?.advancedSkills || {};
+    const skillNames = Object.keys(advancedSkillsFromBackground);
+
+    return advancedSkills.filter((ability) =>
+      skillNames.some((skillName) => {
+        const normalizedSkillName = skillName
+          .replace(/^spell/i, '')
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]/g, ' ')
+          .trim()
+          .toLowerCase();
+        const normalizedAbilityName = ability.name
+          .replace(/[_-]/g, ' ')
+          .trim()
+          .toLowerCase();
+
+        return normalizedSkillName === normalizedAbilityName ||
+          normalizedAbilityName.includes(normalizedSkillName) ||
+          normalizedSkillName.includes(normalizedAbilityName);
       })
     );
   };
@@ -517,6 +543,56 @@ export default function VirtualCharacterSheet() {
                             </tr>
                           </tbody>
                         </table>
+                      </div>
+                    )}
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Paper>
+        </div>
+      )}
+
+      {getCharacterAdvancedSkills().length > 0 && (
+        <div className="character-spells-container">
+          <Paper className="spells-paper">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <FlashOnIcon sx={{ fontSize: '24px', color: '#ff9800' }} />
+              <Box sx={{ fontWeight: 'bold', fontSize: '16px' }}>Advanced Skills</Box>
+              <Chip label={getCharacterAdvancedSkills().length} size="small" color="secondary" />
+            </Box>
+            {getCharacterAdvancedSkills().map((ability) => (
+              <Accordion
+                key={ability.id}
+                className="spell-accordion"
+                sx={{
+                  marginBottom: '8px',
+                  '&:last-child': { marginBottom: 0 },
+                  '&.Mui-expanded': {
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  },
+                }}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{
+                    backgroundColor: 'rgba(255, 152, 0, 0.05)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                    <FlashOnIcon sx={{ fontSize: '18px', color: '#ff9800' }} />
+                    <Typography sx={{ fontWeight: 500 }}>{ability.name}</Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ paddingTop: '16px' }}>
+                  <div className="spell-details">
+                    {ability.description && (
+                      <div className="spell-description">
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '4px' }}>Description</Typography>
+                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{ability.description}</Typography>
                       </div>
                     )}
                   </div>
